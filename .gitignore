@@ -1,0 +1,9 @@
+# Ignorer alt i node_modules overalt
+node_modules/
+
+# Ignorer build/output-mapper
+dist/
+build/
+
+# Ignorer miljøfiler
+.env
