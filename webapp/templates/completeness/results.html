@@ -1,0 +1,16 @@
+{% extends 'layout.html' %}
+{% block content %}
+<h2>Resultater for run #{{ run.id }}</h2>
+<table class="table">
+  <thead><tr><th>Kunde ID</th><th>System</th><th>Status</th></tr></thead>
+  <tbody>
+    {% for r in run.checkresult_set %}
+    <tr>
+      <td>{{ r.customer.external_id }}</td>
+      <td>{{ r.external_system.name }}</td>
+      <td>{{ r.status }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

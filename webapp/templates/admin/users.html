@@ -1,0 +1,59 @@
+{# templates/admin/users.html #}
+{% extends 'layout.html' %}
+
+{% block content %}
+  <h2>Brugere</h2>
+
+  <form method="get" class="form-inline mb-3">
+    <input type="text" name="q" value="{{ q }}" class="form-control mr-2"
+           placeholder="Søg personalenummer…">
+    <button type="submit" class="btn btn-outline-primary">Søg</button>
+    <a href="{{ url_for('admin.list_users') }}" class="btn btn-link">Vis alle</a>
+  </form>
+
+  <a href="{{ url_for('admin.create_user') }}" class="btn btn-success mb-3">Ny bruger</a>
+
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Personalnummer</th>
+        <th>Rolle</th>
+        <th>Oprettet</th>
+        <th>Handling</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for u in users %}
+        <tr>
+          <td>{{ u.id }}</td>
+          <td>{{ u.username }}</td>
+          <td>{{ u.role.value }}</td>
+          <td>
+            {# Tjek om created_at er sat før du kalder strftime #}
+            {% if u.created_at %}
+              {{ u.created_at.strftime('%Y-%m-%d') }}
+            {% else %}
+              –
+            {% endif %}
+          </td>
+          <td>
+            <a href="{{ url_for('admin.edit_user', user_id=u.id) }}"
+               class="btn btn-sm btn-primary">Rediger</a>
+            <form method="post"
+                  action="{{ url_for('admin.delete_user', user_id=u.id) }}"
+                  style="display:inline"
+                  onsubmit="return confirm('Slet bruger {{ u.username }}?');">
+              <button type="submit" class="btn btn-sm btn-danger">Slet</button>
+            </form>
+          </td>
+        </tr>
+      {% endfor %}
+      {% if not users %}
+        <tr>
+          <td colspan="5" class="text-center">Ingen brugere fundet.</td>
+        </tr>
+      {% endif %}
+    </tbody>
+  </table>
+{% endblock %}

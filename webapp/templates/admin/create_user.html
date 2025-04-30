@@ -1,0 +1,34 @@
+{# templates/admin/create_user.html #}
+{% extends 'layout.html' %}
+{% block content %}
+  <h2>Opret ny bruger</h2>
+
+  {# Vis validerings-errors, hvis der er nogle #}
+  {% if form.errors %}
+    <div class="alert alert-danger">
+      <ul class="mb-0">
+      {% for field, errs in form.errors.items() %}
+        {% for err in errs %}
+          <li>{{ err }}</li>
+        {% endfor %}
+      {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+
+  <form method="post">
+    {{ form.hidden_tag() }}    {# VIGTIGT: CSRF‐token #}
+
+    <div class="form-group">
+      {{ form.username.label }} 
+      {{ form.username(class="form-control") }}
+    </div>
+
+    <div class="form-group">
+      {{ form.role.label }} 
+      {{ form.role(class="form-control") }}
+    </div>
+
+    <button type="submit" class="btn btn-success">{{ form.submit.label.text }}</button>
+  </form>
+{% endblock %}

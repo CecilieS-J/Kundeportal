@@ -1,0 +1,58 @@
+{# templates/_navigation.html #}
+{% if current_user.is_authenticated %}
+<nav class="navbar navbar-expand-md navbar-dark bg-steel fixed-top">
+  <div class="container">
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggle"
+      aria-controls="navbarToggle" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarToggle">
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item">
+          <abbr title="Gå til din forside">
+            <a class="nav-link" href="{{ url_for('public.home') }}">Hjem</a>
+          </abbr>
+        </li>
+        
+
+        {# Værktøjer-dropdown #}
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+             data-bs-toggle="dropdown" aria-expanded="false">
+            Værktøjer
+          </a>
+          <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+            <li>
+              <abbr title="…you wish">
+                <a class="dropdown-item" href="{{ url_for('public.barcodes') }}">barcodes</a>
+              </abbr>
+            </li>
+            <li><hr class="dropdown-divider"></li>
+          </ul>
+        </li>
+
+        {# Administration kun for dataansvarlig #}
+        {% if current_user.role == UserRole.dataansvarlig %}
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button"
+             data-bs-toggle="dropdown" aria-expanded="false">
+            Administration
+          </a>
+          <ul class="dropdown-menu" aria-labelledby="adminDropdown">
+            <li><a class="dropdown-item" href="{{ url_for('admin.list_users') }}">Brugere</a></li>
+            <li><a class="dropdown-item" href="{{ url_for('admin.login_history') }}">Login-historik</a></li>
+          </ul>
+        </li>
+        {% endif %}
+      </ul>
+
+      {# Log ud til højre #}
+      <ul class="navbar-nav ml-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="{{ url_for('auth.logout') }}">Log ud</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+{% endif %}

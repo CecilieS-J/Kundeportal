@@ -1,0 +1,45 @@
+{% extends 'layout.html' %}
+{% block content %}
+  <h2>Rediger bruger {{ user.username }}</h2>
+
+  {% if form.errors %}
+    <div class="alert alert-danger">
+      <ul>
+      {% for errs in form.errors.values() %}
+        {% for e in errs %}
+          <li>{{ e }}</li>
+        {% endfor %}
+      {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+
+  <form method="post">
+    {{ form.hidden_tag() }} {# VIGTIGT: CSRF‐token #}
+
+    <div class="form-group">
+      {{ form.username.label }} {{ form.username(class="form-control") }}
+    </div>
+
+    <div class="form-group">
+      {{ form.password.label }} {{ form.password(class="form-control") }}
+      {% for e in form.password.errors %}<small class="text-danger">{{ e }}</small>{% endfor %}
+    </div>
+
+    <div class="form-group">
+      {{ form.confirm.label }} {{ form.confirm(class="form-control") }}
+      {% for e in form.confirm.errors %}<small class="text-danger">{{ e }}</small>{% endfor %}
+    </div>
+
+    <div class="form-group">
+      {{ form.role.label }} {{ form.role(class="form-control") }}
+    </div>
+
+    
+    <div class="form-group mt-3">
+      <button type="submit" class="btn btn-primary">{{ form.submit.label.text }}</button>
+      <a href="{{ url_for('admin.list_users') }}" class="btn btn-secondary ml-2">Tilbage</a>
+    </div>
+    
+  </form>
+{% endblock %}

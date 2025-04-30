@@ -1,0 +1,27 @@
+{# webapp/templates/admin/login_history.html #}
+{% extends 'layout.html' %}
+{% block content %}
+  <h2>Login-historik</h2>
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <th>Tidspunkt</th>
+        <th>Bruger</th>
+        <th>IP-adresse</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for entry in entries %}
+        <tr>
+          <td>{{ entry.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+          <td>{{ entry.user.username }}</td>
+          <td>{{ entry.ip_address or '-' }}</td>
+        </tr>
+      {% endfor %}
+      {% if not entries %}
+        <tr><td colspan="3" class="text-center">Ingen historik fundet.</td></tr>
+      {% endif %}
+    </tbody>
+  </table>
+  <a href="{{ url_for('admin.list_users') }}" class="btn btn-link">Tilbage til brugere</a>
+{% endblock %}
