@@ -1,0 +1,17 @@
+{% extends 'layout.html' %}
+{% block content %}
+  <h2>Hent kundedata via Goodie ID</h2>
+  <form method="post">
+    {{ form.hidden_tag() }}
+    <div class="form-group">
+      {{ form.goodie_id.label(class="form-label") }}
+      {{ form.goodie_id(class="form-control") }}
+      {% if form.goodie_id.errors %}
+        <div class="text-danger">
+          {{ form.goodie_id.errors[0] }}
+        </div>
+      {% endif %}
+    </div>
+    {{ form.submit(class="btn btn-primary") }}
+  </form>
+{% endblock %}

@@ -1,31 +1,43 @@
-from dotenv import load_dotenv
+# config.py
 import os
+from typing import Optional
+from pydantic_settings import BaseSettings
+from pydantic import AnyUrl
 from datetime import timedelta
-load_dotenv()  # læs variabler fra .env ind i os.environ
 
 
+class Settings(BaseSettings):
+    # Secret key med dev-fallback
+    SECRET_KEY: str = "fallback-til-dev"
 
-basedir = os.path.abspath(os.path.dirname(__file__))
-
-
-class Config:
-    
-    SECRET_KEY = os.environ.get("SECRET_KEY") or "fallback-til-dev"
-
-
-    # Brug instance-mappen til din DB‐fil
-    SQLALCHEMY_DATABASE_URI = (
-        os.environ.get("DATABASE_URL")
-        or "sqlite:///" + os.path.join(basedir, "instance", "customer_data.db")
+    # Database: brug .env eller fald tilbage til instance/customer_data.db
+    DATABASE_URL: AnyUrl = os.getenv(
+        "DATABASE_URL",
+        "sqlite:///" + os.path.join(
+            os.path.abspath(os.path.dirname(__file__)),
+            "instance",
+            "customer_data.db",
+        ),
     )
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SQLALCHEMY_TRACK_MODIFICATIONS: bool = False
 
 
-    SESSION_PERMANENT = True
-    SESSION_COOKIE_SECURE    = True    # Kun send cookie over HTTPS
-    SESSION_COOKIE_HTTPONLY  = True    # Forhindrer JS i at læse cookie
-    REMEMBER_COOKIE_SECURE   = True
-    REMEMBER_COOKIE_HTTPONLY = True
+    EXTERNAL_DATABASE_URL: AnyUrl 
 
-    PERMANENT_SESSION_LIFETIME = timedelta(minutes=30)
 
+    
+    # Session/Cookie-indstillinger
+    SESSION_PERMANENT: bool = True
+    SESSION_COOKIE_SECURE: bool = True
+    SESSION_COOKIE_HTTPONLY: bool = True
+    REMEMBER_COOKIE_SECURE: bool = True
+    REMEMBER_COOKIE_HTTPONLY: bool = True
+    PERMANENT_SESSION_LIFETIME: timedelta = timedelta(minutes=30)
+
+
+    class Config:
+        env_file = ".env"
+        env_file_encoding = "utf-8"
+
+# Én global instans
+settings = Settings()

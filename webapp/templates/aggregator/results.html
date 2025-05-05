@@ -1,0 +1,39 @@
+{% extends 'layout.html' %}
+{% block content %}
+  <h2>Data for Goodie ID: {{ goodie_id }}</h2>
+
+  {% if external %}
+    <div class="mb-4">
+      <h3>Raw JSON data</h3>
+      <pre style="background:#f8f9fa; padding:1em; border-radius:4px;">
+{{ external.data_pretty }}
+      </pre>
+    </div>
+
+    <h3>Customer Fields</h3>
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Felt</th>
+          <th>Værdi</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for field in ['customer_id', 'last_name', 'email', 'omneo_id', 'customer_no', 'sib_id', 'clientela_id'] %}
+        <tr>
+          <td>{{ field.replace('_', ' ').capitalize() }}</td>
+          <td>{{ external[field] or '–' }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <div class="alert alert-warning">
+      Ingen data fundet for Goodie ID <strong>{{ goodie_id }}</strong>.
+    </div>
+  {% endif %}
+
+  <a href="{{ url_for('aggregator.missing_customers') }}" class="btn btn-secondary">
+    Tilbage
+  </a>
+{% endblock %}

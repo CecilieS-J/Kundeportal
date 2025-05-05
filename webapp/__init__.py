@@ -5,13 +5,28 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager, current_user
 from flask_talisman import Talisman
-from config import Config
+from config import settings
 from datetime import datetime, timezone
 
 
 #Opret app
-app = Flask(__name__, template_folder="templates")
-app.config.from_object(Config)
+app = Flask(__name__, template_folder="templates", instance_relative_config=True)
+
+ # Overfør alle settings manuelt
+app.config["SECRET_KEY"]                  = settings.SECRET_KEY
+app.config["WTF_CSRF_ENABLED"] = True
+app.config["WTF_CSRF_SECRET_KEY"] = settings.SECRET_KEY
+
+app.config["SQLALCHEMY_DATABASE_URI"]     = str(settings.DATABASE_URL)
+# Rigtig nøgle som du har i config.py:
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = settings.SQLALCHEMY_TRACK_MODIFICATIONS
+
+app.config["SESSION_PERMANENT"]           = settings.SESSION_PERMANENT
+app.config["SESSION_COOKIE_SECURE"]       = settings.SESSION_COOKIE_SECURE
+app.config["SESSION_COOKIE_HTTPONLY"]     = settings.SESSION_COOKIE_HTTPONLY
+app.config["REMEMBER_COOKIE_SECURE"]      = settings.REMEMBER_COOKIE_SECURE
+app.config["REMEMBER_COOKIE_HTTPONLY"]    = settings.REMEMBER_COOKIE_HTTPONLY
+app.config["PERMANENT_SESSION_LIFETIME"]  = settings.PERMANENT_SESSION_LIFETIME
 
 # Konfiguration af CSP (eksempel)
 
@@ -91,7 +106,7 @@ def unauthorized_callback():
 
 #Globalt før-request: kun auth & static er offentligt
 
-@app.before_request
+
 @app.before_request
 def require_login():
     allowed = ('auth.login', 'auth.logout', 'auth.change_password')
@@ -134,11 +149,14 @@ import webapp.models
 # 10) Importér blueprints
 from webapp.auth         import auth_bp
 from webapp.admin        import admin_bp
-from webapp.completeness import completeness_bp
+from webapp.aggregator   import aggregator_bp
 from webapp.routes       import public_bp
+
 
 #Registrér blueprints i ønsket rækkefølge
 app.register_blueprint(auth_bp)           # login/logout
 app.register_blueprint(admin_bp)          # /admin/*
-app.register_blueprint(completeness_bp)   # /completeness/*
+app.register_blueprint(aggregator_bp)   # /aggregator/*
 app.register_blueprint(public_bp)         # fx /barcodes
+
+##

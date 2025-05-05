@@ -1,13 +1,16 @@
 # Importer nødvendige biblioteker
-from webapp import app
+from webapp import app,db
 
 def main():
+      # 1) Opret instance/customer_data.db og alle tabeller
+    with app.app_context():
+        db.create_all()
     # (valgfrit) udskriv endpoints for hurtigt overblik
     for rule in app.url_map.iter_rules():
         print(f"{rule.endpoint:30s} -> {rule}")
     # start dev-server
-    #app.run(host='127.0.0.1', port=80, debug=True)
-    app.run(host='0.0.0.0', port=80, debug=True)
+    app.run(host='127.0.0.1', port=80, debug=True)
+    #app.run(host='0.0.0.0', port=80, debug=True)
 
 # Køres kun hvis scriptet køres direkte
 # Hvis scriptet importeres, så køres main ikke

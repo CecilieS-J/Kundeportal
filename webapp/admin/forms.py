@@ -1,9 +1,9 @@
 # webapp/admin/forms.py
 
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SelectField, SubmitField
+from wtforms import StringField, PasswordField, SelectField, SubmitField, ValidationError
 from wtforms.validators import DataRequired, Regexp, EqualTo
-from webapp.models import UserRole
+from webapp.models import UserRole, User
 
 
 class CreateUserForm(FlaskForm):
@@ -21,6 +21,11 @@ class CreateUserForm(FlaskForm):
         choices=[(r.name, r.value) for r in UserRole]
     )
     submit = SubmitField('Opret bruger')
+    
+    def validate_username(self, field):
+        """Kaster fejl, hvis username allerede findes i databasen."""
+        if User.query.filter_by(username=field.data).first():
+            raise ValidationError('Brugernavn optaget')
 
     
 class EditUserForm(FlaskForm):

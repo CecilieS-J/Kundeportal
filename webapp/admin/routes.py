@@ -8,6 +8,7 @@ from webapp import db
 from webapp.models import User, UserRole, LoginHistory
 from webapp.auth.utils import require_roles
 from .forms import CreateUserForm, EditUserForm
+from sqlalchemy.exc import IntegrityError
 
 
 
@@ -31,17 +32,24 @@ def create_user():
         u = User(
             username=form.username.data,
             password_hash=generate_password_hash(default_pw),
-            role=UserRole[form.role.data]
+            role=UserRole[form.role.data],
+            pw_changed_at=now,
+            pw_expires_at=now
         )
-        u.pw_changed_at = now
-        u.pw_expires_at = now
         db.session.add(u)
-        db.session.commit()
-        flash(f"Bruger oprettet med standard‐kodeord {default_pw}", "success")
-        return redirect(url_for('admin.list_users'))
+        try:
+            db.session.commit()
+        except IntegrityError:
+            # Skulle kun ramme ved race‐condition; rollback og tilføj form‐fejl
+            db.session.rollback()
+            form.username.errors.append('Brugernavn optaget')
+            # Vi falder igennem og re-render form’et med fejl
+        else:
+            flash(f"Bruger oprettet med standard‐kodeord {default_pw}", "success")
+            return redirect(url_for('admin.list_users'))
 
+    # GET eller valideringsfejl lander her
     return render_template('admin/create_user.html', form=form)
-
 
 @admin_bp.route('/users/edit/<int:user_id>', methods=['GET','POST'])
 @login_required
