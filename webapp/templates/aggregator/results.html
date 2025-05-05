@@ -1,15 +1,8 @@
 {% extends 'layout.html' %}
 {% block content %}
-  <h2>Data for Goodie ID: {{ goodie_id }}</h2>
+  <h1>Data for Goodie ID: {{ goodie_id }}</h1>
 
   {% if external %}
-    <div class="mb-4">
-      <h3>Raw JSON data</h3>
-      <pre style="background:#f8f9fa; padding:1em; border-radius:4px;">
-{{ external.data_pretty }}
-      </pre>
-    </div>
-
     <h3>Customer Fields</h3>
     <table class="table table-striped">
       <thead>

@@ -13,14 +13,26 @@ from .service import CustomerAggregatorService
 def missing_customers():
     form = GoodieForm()
     if form.validate_on_submit():
-        goodie_id = form.goodie_id.data.strip()
-        service   = CustomerAggregatorService()
-        external  = service.fetch_external(goodie_id)
+        # Trim og brug None hvis tomt
+        goodie_id   = form.goodie_id.data.strip()   or None
+        email       = form.email.data.strip()       or None
+        customer_no = form.customer_no.data.strip() or None
+
+        service  = CustomerAggregatorService()
+        external = service.aggregate(
+            goodie_id=goodie_id,
+            email=email,
+            customer_no=customer_no
+        )
+
+        # Hvad skal stå i overskriften?
+        søgeværdi = goodie_id or email or customer_no or ''
+
         return render_template(
             'aggregator/results.html',
-            goodie_id=goodie_id,
+            goodie_id=søgeværdi,
             external=external
         )
 
-    # Ved GET eller valideringsfejl
+    # GET eller valideringsfejl → vis form igen
     return render_template('aggregator/form.html', form=form)
