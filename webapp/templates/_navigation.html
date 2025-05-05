@@ -15,21 +15,56 @@
         </li>
         
 
-        {# Værktøjer-dropdown #}
+        {# Kundeopslag-dropdown #}
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
              data-bs-toggle="dropdown" aria-expanded="false">
-            Værktøjer
+            Kundeopslag
           </a>
           <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
             <li>
               <abbr title="…you wish">
-                <a class="dropdown-item" href="{{ url_for('aggregator.missing_customers') }}">Kundesammenligning</a>
+                <a class="dropdown-item" href="{{ url_for('aggregator.missing_customers') }}">Søg kunde i MDM</a>
+                <li><hr class="dropdown-divider"></li>
+              </abbr>
+              <abbr title="Vis eventlog for én eller flere kunder">
+                <a class="dropdown-item" href="{{ url_for('aggregator.missing_customers') }}">Event-log</a>
               </abbr>
             </li>
-            <li><hr class="dropdown-divider"></li>
           </ul>
         </li>
+
+        {# Datakvalitet-dropdown #}
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+             data-bs-toggle="dropdown" aria-expanded="false">
+            Datakvalitet
+          </a>
+          <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+            <li>
+              <abbr title="Udtrækker alle kunder, der mangler i mindst ét system">
+                <a class="dropdown-item" href="{{ url_for('aggregator.missing_customers') }}">Manglende kunder</a>
+                <li><hr class="dropdown-divider"></li>
+              </abbr>
+              <abbr title="Identificér dubletter i Brevo baseret på e-mail og SIB ID">
+                <a class="dropdown-item" href="{{ url_for('aggregator.missing_customers') }}">Dubletter i Brevo</a>
+                <li><hr class="dropdown-divider"></li>
+              </abbr>
+              <abbr title="Valider e-mailadresser på tværs af systemer for syntaks og API-status">
+                <a class="dropdown-item" href="{{ url_for('aggregator.missing_customers') }}">Ugyldig e-mails</a>
+                <li><hr class="dropdown-divider"></li>
+              </abbr>
+              <abbr title="Sammenlign felter som navn, e-mail og ID’er på tværs af MDM, SFCC, Omneo og Brevo">
+                <a class="dropdown-item" href="{{ url_for('aggregator.missing_customers') }}">Sammenlign kundedata</a>
+                <li><hr class="dropdown-divider"></li>
+              </abbr>
+              <abbr title="Kontroller sletning af kunder i alle systemer i henhold til GDPR’s retten-till-at-blive-glemt">
+                <a class="dropdown-item" href="{{ url_for('aggregator.missing_customers') }}">GDPR-sletning</a>
+              </abbr>
+            </li>
+          </ul>
+        </li>
+
 
         {# Administration kun for dataansvarlig #}
         {% if current_user.role == UserRole.dataansvarlig %}
