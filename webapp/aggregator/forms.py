@@ -1,21 +1,28 @@
-# webapp/aggregator/forms.py
-
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField
+from wtforms import StringField, SubmitField, RadioField
 from wtforms.fields import EmailField
-from wtforms.validators import Optional, Email
+from flask_wtf.file import FileField, FileAllowed, FileRequired
+from wtforms.validators import Optional, Email, DataRequired
 
 class GoodieForm(FlaskForm):
-    goodie_id = StringField(
-        "Goodie ID",
-        validators=[Optional()]
+    search_type = RadioField(
+        "Søg efter",
+        choices=[
+            ('goodie_id',   'Goodie ID'),
+            ('email',       'Email'),
+            ('customer_no', 'Customer No'),
+             ('sib_id',       'SIB ID'),
+            ('phone',        'Telefonnummer'),
+        ],
+        default='goodie_id',
+        validators=[DataRequired()]
     )
-    email = EmailField(
-        "Email",
-        validators=[Optional(), Email(message="Ugyldig emailadresse")]
-    )
-    customer_no = StringField(
-        "Customer No",
-        validators=[Optional()]
+    query_value = StringField("Søgeværdi", validators=[Optional()])
+    excel_file = FileField(
+        "Upload Excel (.xlsx)",
+        validators=[
+            Optional(),                         # <— Her skal du have Optional(), IKKE FileRequired
+            FileAllowed(['xlsx'], "Kun .xlsx-filer er tilladt")
+        ]
     )
     submit = SubmitField("Søg")

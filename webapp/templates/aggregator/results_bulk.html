@@ -1,0 +1,35 @@
+{% extends 'layout.html' %}
+{% block content %}
+  <h2>Bulk-resultater</h2>
+  {% if results %}
+    <table class="table table-striped">
+        <thead>
+            <tr>
+              <th>Søg på</th>
+              <th>Customer ID</th>
+              <th>Customer No</th>
+              <th>Last name</th>
+              <th>Email</th>
+              <th>Omneo ID</th>
+              <th>Sib ID</th>
+            </tr>
+          </thead>          
+          <tbody>
+            {% for r in results %}
+            <tr>
+              <td>{{ r.søgeværdi }}</td>
+              <td>{{ r.customer_id or '–' }}</td>
+              <td>{{ r.customer_no or '–' }}</td>
+              <td>{{ r.last_name    or '–' }}</td>
+              <td>{{ r.email        or '–' }}</td>
+              <td>{{ r.omneo_id     or '–' }}</td>
+              <td>{{ r.sib_id       or '–' }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>          
+    </table>
+  {% else %}
+    <div class="alert alert-warning">Ingen resultater.</div>
+  {% endif %}
+  <a href="{{ url_for('aggregator.missing_customers') }}" class="btn btn-secondary">Tilbage</a>
+{% endblock %}
