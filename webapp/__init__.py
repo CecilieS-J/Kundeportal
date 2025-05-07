@@ -8,6 +8,8 @@ from flask_talisman import Talisman
 from config import settings
 from datetime import datetime, timezone
 from flask_apscheduler import APScheduler
+from .mail import mail
+
 
 #Opret app
 app = Flask(__name__, template_folder="templates", instance_relative_config=True)
@@ -23,7 +25,16 @@ app.config.update({
     "SESSION_COOKIE_HTTPONLY": settings.SESSION_COOKIE_HTTPONLY,
     "REMEMBER_COOKIE_SECURE": settings.REMEMBER_COOKIE_SECURE,
     "REMEMBER_COOKIE_HTTPONLY": settings.REMEMBER_COOKIE_HTTPONLY,
+    'MAIL_SERVER':        settings.MAIL_SERVER,
+    'MAIL_PORT':          settings.MAIL_PORT,
+    'MAIL_USE_TLS':       settings.MAIL_USE_TLS,
+    'MAIL_USERNAME':      settings.MAIL_USERNAME,
+    'MAIL_PASSWORD':      settings.MAIL_PASSWORD,
+    'MAIL_DEFAULT_SENDER': (settings.MAIL_SENDER_NAME, settings.MAIL_SENDER_ADDRESS),
 })
+
+# Initialisér Flask-Mail
+mail.init_app(app)
 
 # Konfiguration af CSP (eksempel)
 
@@ -95,13 +106,22 @@ scheduler = APScheduler()
 scheduler.init_app(app)
 scheduler.start()
 
-# Kør delete_stale_users hver dag kl. 02:00
 scheduler.add_job(
     id='delete_stale_users',
-    func='webapp.cleanup:delete_stale_users',
+    func='webapp.jobs.cleanup:delete_stale_users',
     trigger='cron',
     hour=2, minute=0
 )
+
+scheduler.add_job(
+    id='remind_expiring_passwords',
+    func='webapp.jobs.notifications:remind_expiring_passwords',
+    trigger='cron',
+    hour=9, minute=0
+)
+
+
+
 # --- SLUT Scheduler setup ---
 
 #User-loader (import User indeni for at undgå cirkler)

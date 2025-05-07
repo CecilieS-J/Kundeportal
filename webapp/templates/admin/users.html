@@ -18,6 +18,7 @@
       <tr>
         <th>ID</th>
         <th>Personalnummer</th>
+        <th>E-mail</th>
         <th>Rolle</th>
         <th>Oprettet</th>
         <th>Handling</th>
@@ -28,6 +29,7 @@
         <tr>
           <td>{{ u.id }}</td>
           <td>{{ u.username }}</td>
+          <td>{{ u.email or '–' }}</td>
           <td>{{ u.role.value }}</td>
           <td>
             {# Tjek om created_at er sat før du kalder strftime #}

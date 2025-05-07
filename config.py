@@ -1,6 +1,8 @@
 # config.py
 import os
-from typing import Optional
+from dotenv import load_dotenv
+# Load .env i projektroot
+load_dotenv()
 from pydantic_settings import BaseSettings
 from pydantic import AnyUrl
 from datetime import timedelta
@@ -20,8 +22,6 @@ class Settings(BaseSettings):
         ),
     )
     SQLALCHEMY_TRACK_MODIFICATIONS: bool = False
-
-
     EXTERNAL_DATABASE_URL: AnyUrl 
 
 
@@ -34,6 +34,13 @@ class Settings(BaseSettings):
     REMEMBER_COOKIE_HTTPONLY: bool = True
     PERMANENT_SESSION_LIFETIME: timedelta = timedelta(minutes=30)
 
+    MAIL_SERVER: str
+    MAIL_PORT: int
+    MAIL_USE_TLS: bool
+    MAIL_USERNAME: str
+    MAIL_PASSWORD: str
+    MAIL_SENDER_NAME: str
+    MAIL_SENDER_ADDRESS: str
 
     class Config:
         env_file = ".env"

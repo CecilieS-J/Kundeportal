@@ -2,7 +2,7 @@
 
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SelectField, SubmitField, ValidationError
-from wtforms.validators import DataRequired, Regexp, EqualTo
+from wtforms.validators import DataRequired, Regexp, EqualTo, Email, Length
 from webapp.models import UserRole, User
 
 
@@ -15,6 +15,10 @@ class CreateUserForm(FlaskForm):
             Regexp(r'^\d{4,6}$', message="Personalenummer skal være 4–6 cifre")
         ]
     
+    )
+    email = StringField(
+        "E-mail",
+        validators=[DataRequired(), Email(message="Ugyldig e-mailadresse"), Length(max=120)]
     )
     role = SelectField(
         'Rolle',

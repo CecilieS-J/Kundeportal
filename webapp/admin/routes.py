@@ -31,6 +31,7 @@ def create_user():
 
         u = User(
             username=form.username.data,
+            email=form.email.data, 
             password_hash=generate_password_hash(default_pw),
             role=UserRole[form.role.data],
             pw_changed_at=now,

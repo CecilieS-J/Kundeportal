@@ -1,34 +1,35 @@
-{# templates/admin/create_user.html #}
 {% extends 'layout.html' %}
 {% block content %}
-  <h2>Opret ny bruger</h2>
-
-  {# Vis validerings-errors, hvis der er nogle #}
-  {% if form.errors %}
-    <div class="alert alert-danger">
-      <ul class="mb-0">
-      {% for field, errs in form.errors.items() %}
-        {% for err in errs %}
-          <li>{{ err }}</li>
-        {% endfor %}
-      {% endfor %}
-      </ul>
-    </div>
-  {% endif %}
-
+  <h2>Opret bruger</h2>
   <form method="post">
-    {{ form.hidden_tag() }}    {# VIGTIGT: CSRF‐token #}
+    {{ form.hidden_tag() }}
 
     <div class="form-group">
-      {{ form.username.label }} 
+      {{ form.username.label(class="form-label") }}
       {{ form.username(class="form-control") }}
+      {% for err in form.username.errors %}
+        <div class="text-danger">{{ err }}</div>
+      {% endfor %}
     </div>
 
     <div class="form-group">
-      {{ form.role.label }} 
-      {{ form.role(class="form-control") }}
+      {{ form.email.label(class="form-label") }}
+      {{ form.email(class="form-control") }}
+      {% for err in form.email.errors %}
+        <div class="text-danger">{{ err }}</div>
+      {% endfor %}
     </div>
 
-    <button type="submit" class="btn btn-success">{{ form.submit.label.text }}</button>
+    <div class="form-group">
+      {{ form.role.label(class="form-label") }}
+      {{ form.role(class="form-control") }}
+      {% for err in form.role.errors %}
+        <div class="text-danger">{{ err }}</div>
+      {% endfor %}
+    </div>
+
+    <div class="form-group">
+      {{ form.submit(class="btn btn-primary") }}
+    </div>
   </form>
 {% endblock %}
