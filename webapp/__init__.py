@@ -7,26 +7,23 @@ from flask_login import LoginManager, current_user
 from flask_talisman import Talisman
 from config import settings
 from datetime import datetime, timezone
-
+from flask_apscheduler import APScheduler
 
 #Opret app
 app = Flask(__name__, template_folder="templates", instance_relative_config=True)
 
- # Overfør alle settings manuelt
-app.config["SECRET_KEY"]                  = settings.SECRET_KEY
-app.config["WTF_CSRF_ENABLED"] = True
-app.config["WTF_CSRF_SECRET_KEY"] = settings.SECRET_KEY
 
-app.config["SQLALCHEMY_DATABASE_URI"]     = str(settings.DATABASE_URL)
-# Rigtig nøgle som du har i config.py:
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = settings.SQLALCHEMY_TRACK_MODIFICATIONS
-
-app.config["SESSION_PERMANENT"]           = settings.SESSION_PERMANENT
-app.config["SESSION_COOKIE_SECURE"]       = settings.SESSION_COOKIE_SECURE
-app.config["SESSION_COOKIE_HTTPONLY"]     = settings.SESSION_COOKIE_HTTPONLY
-app.config["REMEMBER_COOKIE_SECURE"]      = settings.REMEMBER_COOKIE_SECURE
-app.config["REMEMBER_COOKIE_HTTPONLY"]    = settings.REMEMBER_COOKIE_HTTPONLY
-app.config["PERMANENT_SESSION_LIFETIME"]  = settings.PERMANENT_SESSION_LIFETIME
+app.config.update({
+    "SECRET_KEY": settings.SECRET_KEY,
+    "SQLALCHEMY_DATABASE_URI": str(settings.DATABASE_URL),
+    "SQLALCHEMY_TRACK_MODIFICATIONS": settings.SQLALCHEMY_TRACK_MODIFICATIONS,
+    "PERMANENT_SESSION_LIFETIME": settings.PERMANENT_SESSION_LIFETIME,
+    "SESSION_PERMANENT": settings.SESSION_PERMANENT,
+    "SESSION_COOKIE_SECURE": settings.SESSION_COOKIE_SECURE,
+    "SESSION_COOKIE_HTTPONLY": settings.SESSION_COOKIE_HTTPONLY,
+    "REMEMBER_COOKIE_SECURE": settings.REMEMBER_COOKIE_SECURE,
+    "REMEMBER_COOKIE_HTTPONLY": settings.REMEMBER_COOKIE_HTTPONLY,
+})
 
 # Konfiguration af CSP (eksempel)
 
@@ -93,6 +90,20 @@ login_manager = LoginManager(app)
 login_manager.login_view = 'auth.login'
 login_manager.session_protection = 'strong'
 
+# --- START Scheduler setup ---
+scheduler = APScheduler()
+scheduler.init_app(app)
+scheduler.start()
+
+# Kør delete_stale_users hver dag kl. 02:00
+scheduler.add_job(
+    id='delete_stale_users',
+    func='webapp.cleanup:delete_stale_users',
+    trigger='cron',
+    hour=2, minute=0
+)
+# --- SLUT Scheduler setup ---
+
 #User-loader (import User indeni for at undgå cirkler)
 @login_manager.user_loader
 def load_user(user_id):
@@ -143,8 +154,6 @@ def inject_user_role():
     from webapp.models import UserRole
     return dict(UserRole=UserRole)
 
-#Importér modeller, så SQLAlchemy kender dem
-import webapp.models
 
 # 10) Importér blueprints
 from webapp.auth         import auth_bp
