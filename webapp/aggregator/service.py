@@ -11,8 +11,7 @@ class CustomerAggregatorService:
                        goodie_id=None,
                        email=None,
                        customer_no=None,
-                       sib_id=None,
-                       phone=None):
+                       sib_id=None):
         sql = """
             SELECT
               jsonb_pretty(data)       AS data_pretty,
@@ -45,15 +44,6 @@ class CustomerAggregatorService:
         if sib_id:
             sql += " AND data->>'sib_id' = :sib_id"
             params['sib_id'] = sib_id
-        if phone:
-            sql += """
-              AND (
-                data->>'phone_home'   = :phone OR
-                data->>'phone_mobile' = :phone OR
-                data->>'phone_business' = :phone
-              )
-            """
-            params['phone'] = phone
 
         stmt = text(sql)
         with ExternalSession() as session:

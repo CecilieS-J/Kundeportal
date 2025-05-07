@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, RadioField
-from flask_wtf.file import FileField, FileAllowed, FileRequired
-from wtforms.validators import Optional, Email, DataRequired
+from flask_wtf.file import FileField, FileAllowed
+from wtforms.validators import Optional, DataRequired
 
 class GoodieForm(FlaskForm):
     search_type = RadioField(
@@ -11,7 +11,6 @@ class GoodieForm(FlaskForm):
             ('email',       'Email'),
             ('customer_no', 'Customer No'),
              ('sib_id',       'SIB ID'),
-            ('phone',        'Telefonnummer'),
         ],
         default='goodie_id',
         validators=[DataRequired()]

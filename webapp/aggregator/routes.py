@@ -9,10 +9,10 @@ from .service import CustomerAggregatorService
 import io
 import pandas as pd
 
-@aggregator_bp.route('/missing', methods=['GET', 'POST'])
+@aggregator_bp.route('/search', methods=['GET', 'POST'])
 @login_required
 @require_roles(UserRole.dataansvarlig, UserRole.it_supporter)
-def missing_customers():
+def search_customers_mdm():
     form = GoodieForm()
     if not form.validate_on_submit():
         return render_template('aggregator/form.html', form=form)
