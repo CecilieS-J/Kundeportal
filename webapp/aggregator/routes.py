@@ -4,6 +4,7 @@ from webapp.auth.utils import require_roles
 from webapp.models import UserRole
 from . import aggregator_bp
 from .forms import GoodieForm
+from .forms import EventForm 
 from .service import CustomerAggregatorService
 import io
 import pandas as pd
@@ -48,4 +49,22 @@ def missing_customers():
         'aggregator/results.html',
         goodie_id=first.get('søgeværdi', ''),
         external=first
+    )
+
+
+@aggregator_bp.route('/events', methods=['GET', 'POST'])
+@login_required
+@require_roles(UserRole.dataansvarlig, UserRole.it_supporter)
+def event_log():
+    form   = EventForm()
+    events = []
+
+    if form.validate_on_submit():
+        gid    = form.goodie_id.data.strip()
+        events = CustomerAggregatorService().fetch_event_log(goodie_id=gid)
+
+    return render_template(
+        'aggregator/event_log.html',
+        form=form,
+        events=events
     )

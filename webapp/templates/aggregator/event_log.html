@@ -1,0 +1,50 @@
+{% extends 'layout.html' %}
+{% block content %}
+  <h2>Event-log</h2>
+
+  <form method="post" class="mb-3">
+    {{ form.hidden_tag() }}
+    <div class="form-group">
+      {{ form.goodie_id.label(class="form-label") }}
+      {{ form.goodie_id(class="form-control") }}
+      {% if form.goodie_id.errors %}
+        <div class="text-danger">{{ form.goodie_id.errors[0] }}</div>
+      {% endif %}
+    </div>
+    {{ form.submit(class="btn btn-primary") }}
+  </form>
+
+  {% if events %}
+    <table class="table table-sm table-striped">
+      <thead>
+        <tr>
+          <th>Event ID</th>
+          <th>Timestamp</th>
+          <th>Type</th>
+          <th>System</th>
+          <th>Email</th>
+          <th>Data (JSON)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for ev in events %}
+        <tr>
+          <td>{{ ev.event_id }}</td>
+          <td>{{ ev.timestamp }}</td>
+          <td>{{ ev.type }}</td>
+          <td>{{ ev.system }}</td>
+          <td>{{ ev.email or '–' }}</td>
+          <td>
+            <details>
+              <summary>Vis JSON</summary>
+              <pre>{{ ev.data_json | tojson(indent=2) }}</pre>
+            </details>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% elif form.is_submitted() %}
+    <div class="alert alert-warning">Ingen events fundet for {{ form.goodie_id.data }}.</div>
+  {% endif %}
+{% endblock %}

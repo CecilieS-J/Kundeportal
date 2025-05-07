@@ -62,3 +62,37 @@ class CustomerAggregatorService:
 
     def aggregate(self, **kwargs):
         return self.fetch_external(**kwargs)
+    
+    # webapp/aggregator/service.py
+
+    def fetch_event_log(self, goodie_id=None, customer_no=None, email=None, sib_id=None, phone=None):
+        # Vælg parameter
+        if goodie_id:
+            where = "event_data->>'c_goodieCardNumber' = :val"
+            val   = goodie_id
+        elif customer_no:
+            where = "event_data->>'customer_no' = :val"
+            val   = customer_no
+        elif email:
+            where = "event_data->>'email' = :val"
+            val   = email
+        else:
+            return []
+
+        sql = f"""
+            SELECT
+              event_id,
+              ts                             AS timestamp,
+              type::text                     AS type,       -- cast enum til text
+              src_system::text               AS system,     -- cast også hvis enum
+              event_data->>'email'           AS email,
+              event_data                     AS data_json
+            FROM "event"
+            WHERE {where}
+            ORDER BY ts DESC
+        """
+        stmt = text(sql)
+        with ExternalSession() as session:
+            rows = session.execute(stmt, {"val": val}).mappings().all()
+
+        return [dict(r) for r in rows]

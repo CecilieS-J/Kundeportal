@@ -1,6 +1,5 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, RadioField
-from wtforms.fields import EmailField
 from flask_wtf.file import FileField, FileAllowed, FileRequired
 from wtforms.validators import Optional, Email, DataRequired
 
@@ -26,3 +25,12 @@ class GoodieForm(FlaskForm):
         ]
     )
     submit = SubmitField("Søg")
+
+
+
+class EventForm(FlaskForm):
+    goodie_id = StringField(
+        "Goodie ID",
+        validators=[DataRequired(message="Du skal indtaste et Goodie ID")]
+    )
+    submit    = SubmitField("Hent event-log")
