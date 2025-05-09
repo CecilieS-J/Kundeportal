@@ -1,4 +1,5 @@
 # webapp/admin/routes.py
+import os
 from webapp.admin import admin_bp
 from flask import render_template, redirect, url_for, flash, request
 from werkzeug.security import generate_password_hash
@@ -123,3 +124,18 @@ def delete_user(user_id):
 def login_history():
     entries = LoginHistory.query.order_by(LoginHistory.timestamp.desc()).limit(100).all()
     return render_template('admin/login_history.html', entries=entries)
+
+
+@admin_bp.route('/admin/cleanup-logs')
+@login_required
+@require_roles(UserRole.dataansvarlig)
+def cleanup_logs():
+
+    log_path = os.path.join('logs', 'cleanup.log')
+    try:
+        with open(log_path, 'r') as f:
+            logs = f.read()
+    except FileNotFoundError:
+        logs = "Ingen logfil fundet."
+
+    return render_template('admin/cleanup_logs.html', logs=logs)

@@ -34,8 +34,8 @@ class Settings(BaseSettings):
     
 
     # Mailgun HTTP API
-    MAILGUN_DOMAIN: str              # f.eks. "sandbox…mailgun.org"
-    MAILGUN_API_KEY: str             # f.eks. "key-…"
+    MAILGUN_DOMAIN: str              
+    MAILGUN_API_KEY: str             
 
     class Config:
         env_file = ".env"

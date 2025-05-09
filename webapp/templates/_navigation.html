@@ -76,6 +76,7 @@
           <ul class="dropdown-menu" aria-labelledby="adminDropdown">
             <li><a class="dropdown-item" href="{{ url_for('admin.list_users') }}">Brugere</a></li>
             <li><a class="dropdown-item" href="{{ url_for('admin.login_history') }}">Login-historik</a></li>
+            <li><a class="dropdown-item" href="{{ url_for('admin.cleanup_logs') }}">Oprydningslog</a></li>
           </ul>
         </li>
         {% endif %}
