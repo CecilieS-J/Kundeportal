@@ -1,7 +1,6 @@
 import os
 import logging
 from datetime import datetime, timedelta, timezone
-from .. import db
 from ..models import User
 from ..mail import send_alert
 
@@ -20,20 +19,34 @@ notif_logger.addHandler(notif_handler)
 notif_logger.setLevel(logging.INFO)
 
 def remind_expiring_passwords():
-    now  = datetime.now(timezone.utc)
-    soon = now + timedelta(days=2)
-    users = User.query.filter(User.pw_expires_at.between(now, soon)).all()
+    """
+    Sender reminder til brugere, hvis sidste password-skrift:
+      - er mindst 48 timer siden, og
+      - er maksimum 14 dage siden (ellers slettes de snart).
+    """
+    now = datetime.now(timezone.utc)
+    # Kun de, som har skiftet for mindst 48 timer siden
+    remind_threshold = now - timedelta(hours=48)
+    # Og som er under 14 dage gamle
+    delete_threshold = now - timedelta(days=14)
+
+    users = User.query.filter(
+        User.pw_changed_at <= remind_threshold,
+        User.pw_changed_at > delete_threshold
+    ).all()
 
     for u in users:
         subject = "Reminder: Skift din adgangskode"
         body = (
             f"Kære {u.username},\n\n"
-            f"Dit kodeord udløber den {u.pw_expires_at.strftime('%d/%m/%Y %H:%M')} UTC.\n"
-            "Husk at skifte det for at bevare adgangen.\n\n"
+            f"Du skiftede dit kodeord den {u.pw_changed_at.strftime('%d/%m/%Y %H:%M')} UTC.\n"
+            "Det er nu over 48 timer siden. For din egen sikkerhed bør du skifte det igen senest om 14 dage.\n\n"
             "Mvh. IT-support"
         )
         try:
             send_alert(subject, [u.email], body)
-            notif_logger.info(f"Reminder sendt til {u.username} <{u.email}>; expires at {u.pw_expires_at}")
+            notif_logger.info(
+                f"Reminder sendt til {u.username} <{u.email}>; pw_changed_at={u.pw_changed_at}"
+            )
         except Exception as e:
             notif_logger.error(f"Kunne ikke sende reminder til {u.username}: {e}")

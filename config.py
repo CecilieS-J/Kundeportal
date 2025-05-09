@@ -1,4 +1,3 @@
-# config.py
 import os
 from dotenv import load_dotenv
 # Load .env i projektroot
@@ -22,10 +21,8 @@ class Settings(BaseSettings):
         ),
     )
     SQLALCHEMY_TRACK_MODIFICATIONS: bool = False
-    EXTERNAL_DATABASE_URL: AnyUrl 
+    EXTERNAL_DATABASE_URL: AnyUrl  
 
-
-    
     # Session/Cookie-indstillinger
     SESSION_PERMANENT: bool = True
     SESSION_COOKIE_SECURE: bool = True
@@ -34,13 +31,11 @@ class Settings(BaseSettings):
     REMEMBER_COOKIE_HTTPONLY: bool = True
     PERMANENT_SESSION_LIFETIME: timedelta = timedelta(minutes=30)
 
-    MAIL_SERVER: str
-    MAIL_PORT: int
-    MAIL_USE_TLS: bool
-    MAIL_USERNAME: str
-    MAIL_PASSWORD: str
-    MAIL_SENDER_NAME: str
-    MAIL_SENDER_ADDRESS: str
+    
+
+    # Mailgun HTTP API
+    MAILGUN_DOMAIN: str              # f.eks. "sandbox…mailgun.org"
+    MAILGUN_API_KEY: str             # f.eks. "key-…"
 
     class Config:
         env_file = ".env"

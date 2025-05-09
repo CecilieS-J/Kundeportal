@@ -1,10 +1,9 @@
 # Importer nødvendige biblioteker
-from webapp import app,db
+from webapp import app
+
 
 def main():
-      # 1) Opret instance/customer_data.db og alle tabeller
-    with app.app_context():
-        db.create_all()
+    
     # (valgfrit) udskriv endpoints for hurtigt overblik
     for rule in app.url_map.iter_rules():
         print(f"{rule.endpoint:30s} -> {rule}")

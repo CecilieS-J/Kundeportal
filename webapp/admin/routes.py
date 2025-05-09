@@ -8,8 +8,15 @@ from webapp import db
 from webapp.models import User, UserRole, LoginHistory
 from webapp.auth.utils import require_roles
 from .forms import CreateUserForm, EditUserForm
+from webapp.mail import send_alert
+import logging
 from sqlalchemy.exc import IntegrityError
 
+admin_mail_logger = logging.getLogger('admin-mail')
+handler = logging.StreamHandler()
+handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s %(message)s'))
+admin_mail_logger.addHandler(handler)
+admin_mail_logger.setLevel(logging.DEBUG)
 
 
 @admin_bp.route('/users', methods=['GET'])
@@ -41,15 +48,28 @@ def create_user():
         try:
             db.session.commit()
         except IntegrityError:
-            # Skulle kun ramme ved race‐condition; rollback og tilføj form‐fejl
             db.session.rollback()
             form.username.errors.append('Brugernavn optaget')
-            # Vi falder igennem og re-render form’et med fejl
         else:
-            flash(f"Bruger oprettet med standard‐kodeord {default_pw}", "success")
+            # Send velkomst-mail
+            subject = "Din bruger er oprettet"
+            body = (
+                f"Kære {u.username},\n\n"
+                "Din bruger i Kundeportalen er nu oprettet.\n"
+                f"Brugernavn: {u.username}\n"
+                f"Adgangskode: {default_pw}\n\n"
+                "Når du logger ind første gang, vil du blive bedt om at ændre din adgangskode.\n\n"
+                "Venlig hilsen\n"
+                "IT-support"
+            )
+            try:
+                send_alert(subject, [u.email], body)
+                flash(f"Bruger oprettet og mail sendt til {u.email}", "success")
+            except Exception:
+                flash("Bruger oprettet, men fejl ved afsendelse af velkomst-mail", "warning")
+
             return redirect(url_for('admin.list_users'))
 
-    # GET eller valideringsfejl lander her
     return render_template('admin/create_user.html', form=form)
 
 @admin_bp.route('/users/edit/<int:user_id>', methods=['GET','POST'])
