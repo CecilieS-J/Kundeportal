@@ -6,8 +6,8 @@ from webapp.models import LoginHistory
 
 def require_roles(*allowed_roles):
     """
-    Dekorator, der kun tillader endpoints for current_user.role i allowed_roles.
-    Ellers HTTP 403.
+    Decorator that restricts access to users with specific roles.
+    Returns HTTP 403 if current_user.role is not in allowed_roles.
     """
     def decorator(f):
         @wraps(f)
@@ -20,6 +20,9 @@ def require_roles(*allowed_roles):
     return decorator
 
 def record_login(user_id, ip):
+    """
+    Records a login event with user ID and IP address in the login history.
+    """
     entry = LoginHistory(user_id=user_id, ip_address=ip)
     db.session.add(entry)
     db.session.commit()

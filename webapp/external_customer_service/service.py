@@ -3,9 +3,9 @@
 from sqlalchemy import text
 from clients.external_db import ExternalSession
 
-class CustomerAggregatorService:
+class CustomerExternalService:
     """
-    Henter kun data fra den eksterne DB (customer-tabellen) og returnerer et dict.
+    Retrieves data from the external database (customer table) and returns it as a dictionary.
     """
     def fetch_external(self,
                        goodie_id=None,
@@ -50,13 +50,13 @@ class CustomerAggregatorService:
             row = session.execute(stmt, params).mappings().first()
         return dict(row) if row else {}
 
-    def aggregate(self, **kwargs):
+    def fetch_external_customer(self, **kwargs):
         return self.fetch_external(**kwargs)
     
-    # webapp/aggregator/service.py
+    
 
     def fetch_event_log(self, goodie_id=None, customer_no=None, email=None, sib_id=None, phone=None):
-        # Vælg parameter
+         # Determine which parameter to use in WHERE clause
         if goodie_id:
             where = "event_data->>'c_goodieCardNumber' = :val"
             val   = goodie_id
@@ -73,8 +73,8 @@ class CustomerAggregatorService:
             SELECT
               event_id,
               ts                             AS timestamp,
-              type::text                     AS type,       -- cast enum til text
-              src_system::text               AS system,     -- cast også hvis enum
+              type::text                     AS type,       -- cast enum to text
+              src_system::text               AS system,     -- also cast enum to text
               event_data->>'email'           AS email,
               event_data                     AS data_json
             FROM "event"

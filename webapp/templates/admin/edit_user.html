@@ -15,7 +15,7 @@
   {% endif %}
 
   <form method="post">
-    {{ form.hidden_tag() }} {# VIGTIGT: CSRF‐token #}
+    {{ form.hidden_tag() }} {# Important: CSRF‐token #}
 
     <div class="form-group">
       {{ form.username.label }} {{ form.username(class="form-control") }}

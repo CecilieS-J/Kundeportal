@@ -4,6 +4,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import DataRequired, Length, Regexp, EqualTo
 
+# Login form with username and password fields
 class LoginForm(FlaskForm):
     username = StringField(
         'Brugernavn',
@@ -15,6 +16,7 @@ class LoginForm(FlaskForm):
     )
     submit = SubmitField('Log ind')
 
+# Login form with username and password fields
 class ChangePasswordForm(FlaskForm):
     password = PasswordField(
         'Ny adgangskode',

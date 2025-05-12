@@ -5,12 +5,13 @@ from .. import db
 from ..models import User
 from ..mail import send_alert
 
-# Sørg for at logs-mappen findes
+# Ensure the 'logs' directory exists
 os.makedirs('logs', exist_ok=True)
 
-# Logger osv…
 
-# Logger til cleanup-jobbet
+
+
+# Logger setup for the cleanup job
 cleanup_logger = logging.getLogger('cleanup')
 cleanup_handler = logging.FileHandler('logs/cleanup.log')
 cleanup_handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s %(message)s'))
@@ -18,6 +19,11 @@ cleanup_logger.addHandler(cleanup_handler)
 cleanup_logger.setLevel(logging.INFO)
 
 def delete_stale_users():
+    """
+    Deletes users who have not changed their password within 7 days
+    (considered inactive or stale accounts).
+    Logs each deletion and sends an alert if an error occurs.
+    """
     try:
         cutoff = datetime.now(timezone.utc) - timedelta(days=7)
         stale = User.query.filter(User.pw_changed_at < cutoff).all()

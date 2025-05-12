@@ -24,8 +24,8 @@ def login():
             record_login(user.id, request.remote_addr)
             session.permanent = True
 
-            # ENSARTET tjek af udløb
-            expires = user.pw_expires_at  # <— altid defineret (selv om det er None)
+            # Consistent check for password expiration
+            expires = user.pw_expires_at    # always defined (can be None)
 
             if expires is None:
                 must_change = True
@@ -48,6 +48,9 @@ def login():
 @auth_bp.route('/logout')
 @login_required
 def logout():
+    """
+    Logs out the current user and redirects to the login page.
+    """
     logout_user()
     flash("Du er nu logget ud", "info")
     return redirect(url_for('auth.login'))
@@ -56,9 +59,13 @@ def logout():
 @auth_bp.route('/change-password', methods=['GET', 'POST'])
 @login_required
 def change_password():
+    """
+    Allows the user to change their password.
+    Updates password hash, change timestamp, and sets a new expiration.
+    """
     form = ChangePasswordForm()
     if form.validate_on_submit():
-        # Opdater password og udløbstid
+        
         current_user.password_hash = generate_password_hash(form.password.data)
         current_user.pw_changed_at = datetime.now(timezone.utc)
         current_user.pw_expires_at = datetime.now(timezone.utc) + timedelta(days=7)

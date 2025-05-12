@@ -1,4 +1,3 @@
-# webapp/__init__.py
 
 from flask import Flask, redirect, url_for, request
 from flask_sqlalchemy import SQLAlchemy
@@ -12,13 +11,14 @@ from flask_apscheduler import APScheduler
 
 from scripts.cli import seed_stale_user, clean_users_command
 
-#Opret app
+# Create Flask app instance
 app = Flask(__name__, template_folder="templates", instance_relative_config=True)
 
+# Add custom CLI commands
 app.cli.add_command(seed_stale_user)
 app.cli.add_command(clean_users_command)
 
-
+# Load app configuration from settings
 app.config.update({
     "SECRET_KEY": settings.SECRET_KEY,
     "SQLALCHEMY_DATABASE_URI": str(settings.DATABASE_URL),
@@ -35,8 +35,7 @@ app.config.update({
 
 
 
-# Konfiguration af CSP (eksempel)
-
+# Content Security Policy (CSP) configuration for Talisman
 csp = {
     'default-src': ["'self'"],
 
@@ -77,6 +76,8 @@ csp = {
     'frame-src': ["'none'"]
 }
 
+
+# Enable HTTPS and security headers with Talisman
 Talisman(
     app,
     content_security_policy=csp,
@@ -86,21 +87,21 @@ Talisman(
 )
 
 
-#Rute for roden – altid login
+# Redirect root URL to login page
 @app.route('/')
 def root():
     return redirect(url_for('auth.login'))
 
-#Database + migration
+# Initialize database and migrations
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
-#LoginManager
+# Setup Login Manager
 login_manager = LoginManager(app)
 login_manager.login_view = 'auth.login'
 login_manager.session_protection = 'strong'
 
-# --- START Scheduler setup ---
+# Setup task scheduler with cron jobs
 scheduler = APScheduler()
 scheduler.init_app(app)
 scheduler.start()
@@ -120,20 +121,19 @@ scheduler.add_job(
 )
 
 
-#User-loader (import User indeni for at undgå cirkler)
+# Load user from database by ID
 @login_manager.user_loader
 def load_user(user_id):
     from webapp.models import User
     return User.query.get(int(user_id))
 
-#Uautoriseret adgang → login
+# Redirect unauthorized users to login page
 @login_manager.unauthorized_handler
 def unauthorized_callback():
     return redirect(url_for('auth.login', next=request.path))
 
-#Globalt før-request: kun auth & static er offentligt
 
-
+# Before every request: enforce login except for allowed endpoints and static files
 @app.before_request
 def require_login():
     allowed = ('auth.login', 'auth.logout', 'auth.change_password')
@@ -142,46 +142,43 @@ def require_login():
         (request.endpoint and request.endpoint.endswith('.static'))
     )
 
-    # 1) Hvis ikke logget ind → login
+    # If not logged in, redirect to login page
     if not current_user.is_authenticated and request.endpoint not in allowed and not is_static:
         return redirect(url_for('auth.login', next=request.path))
 
-    # 2) Hvis logget ind → tjek om password skal skiftes
+    # If logged in, check if password needs to be changed
     if current_user.is_authenticated:
-        expires = current_user.pw_expires_at  # <— defineres her, også hvis None
+        expires = current_user.pw_expires_at  
 
-        # Hvis ingen udløbsdato → tving til skift
+        # If no expiration date is set → force password change
         if expires is None:
             needs_change = True
         else:
-            # Hvis naive datetime → antag UTC
+             # If datetime is naive → assume UTC timezone
             if expires.tzinfo is None:
                 expires = expires.replace(tzinfo=timezone.utc)
             needs_change = expires <= datetime.now(timezone.utc)
 
-        # Hvis password SKAL skiftes, og du ikke allerede er på change-password:
+         # If password MUST be changed and not already on change-password page
         if needs_change and request.endpoint not in allowed:
             return redirect(url_for('auth.change_password', next=request.path))
     
 
-#Gør UserRole tilgængelig i templates
+# Make UserRole available in templates
 @app.context_processor
 def inject_user_role():
     from webapp.models import UserRole
     return dict(UserRole=UserRole)
 
 
-# 10) Importér blueprints
+# Import and register blueprints in desired order
 from webapp.auth         import auth_bp
 from webapp.admin        import admin_bp
-from webapp.aggregator   import aggregator_bp
+from webapp.external_customer_service import external_customer_service_bp
 from webapp.routes       import public_bp
 
-
-#Registrér blueprints i ønsket rækkefølge
 app.register_blueprint(auth_bp)           # login/logout
 app.register_blueprint(admin_bp)          # /admin/*
-app.register_blueprint(aggregator_bp)   # /aggregator/*
+app.register_blueprint(external_customer_service_bp)   # /external_customer/*
 app.register_blueprint(public_bp)         # fx /barcodes
 
-##

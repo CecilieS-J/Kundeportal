@@ -1,8 +1,7 @@
-# webapp/auth/__init__.py
-
 from flask import Blueprint
 
-# Definer blueprint‐objektet først
+# Define blueprint‐object for authentication routes
+# (login, logout, change password)
 auth_bp = Blueprint(
     'auth',
     __name__,
@@ -10,5 +9,5 @@ auth_bp = Blueprint(
     template_folder='templates/auth'
 )
 
-# Importér routes med en *ikke-relativ* sti – efter auth_bp er defineret
+# Import routes using a non-relative path – after auth_bp is defined
 import webapp.auth.routes

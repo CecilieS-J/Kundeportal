@@ -1,12 +1,10 @@
-# webapp/routes.py
-
 from flask import Blueprint, render_template, redirect, url_for, request
 from flask_login import login_required, current_user
 
 
-
+# Define a blueprint for public routes (pages available after login)
 public_bp = Blueprint(
-    'public',                  # blueprint-navn
+    'public',                  # blueprint-name
     __name__,
     template_folder='templates'
 )
@@ -15,19 +13,10 @@ public_bp = Blueprint(
 @public_bp.route('/home')
 @login_required
 def home():
+    # Render the home page (requires login)
     return render_template('home.html', title="Magasin´s KundePortal – Hjem")
 
 
-@public_bp.route('/barcodes')
-@login_required
-def barcodes():
-    """
-    Eksempel på en beskyttet side for barcodes.
-    """
-    return render_template(
-        'barcodes.html',
-        title="Magasin´s KundePortal – Barcodes"
-    )
 
 # Du kan tilføje flere use-case-routes her, f.eks. completeness, duplicates, osv.
 # Bare husk at dekorere med @login_required

@@ -1,7 +1,9 @@
+# Forms for customer search and event log lookup in the external_customer_service module.
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, RadioField
 from flask_wtf.file import FileField, FileAllowed
 from wtforms.validators import Optional, DataRequired
+
 
 class GoodieForm(FlaskForm):
     search_type = RadioField(
@@ -19,7 +21,7 @@ class GoodieForm(FlaskForm):
     excel_file = FileField(
         "Upload Excel (.xlsx)",
         validators=[
-            Optional(),                         # <— Her skal du have Optional(), IKKE FileRequired
+            Optional(),                         # Use Optional(), not FileRequired
             FileAllowed(['xlsx'], "Kun .xlsx-filer er tilladt")
         ]
     )

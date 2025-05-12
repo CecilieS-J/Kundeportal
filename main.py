@@ -1,24 +1,24 @@
-# Importer nødvendige biblioteker
+# Import necessary libraries
+import os
 from webapp import app
-
+from backup_script import lav_backup  # Import your backup function
 
 def main():
-    
-    # (valgfrit) udskriv endpoints for hurtigt overblik
+    # (Optional) Print all URL endpoints for a quick overview
     for rule in app.url_map.iter_rules():
         print(f"{rule.endpoint:30s} -> {rule}")
-    # start dev-server
-    app.run(host='127.0.0.1', port=80, debug=True)
-    #app.run(host='0.0.0.0', port=80, debug=True)
 
-# Køres kun hvis scriptet køres direkte
-# Hvis scriptet importeres, så køres main ikke
-# Dette er en god praksis, da det gør det muligt at genbruge funktioner i andre scripts
-# og undgå at køre dem, når scriptet importeres
-# Det er også en god måde at sikre, at scriptet kun køres, når det er nødvendigt
+    try:
+        # Start the development server
+        app.run(host='127.0.0.1', port=80, debug=True)
+        # app.run(host='0.0.0.0', port=80, debug=True)  # Uncomment for external access
+    finally:
+        # Only create backup when running in the actual reloader process (not the first debug spawn)
+        if os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
+            print("Closing app... creating database backup.")
+            lav_backup()
+
+# This ensures the main() function runs only when this script is executed directly,
+# not when it's imported as a module elsewhere.
 if __name__ == "__main__":
     main()
-
-#if __name__ == "__main__":
-    # Debug=True mens du udvikler – husk at slå fra i produktion
- #   app.run(host="0.0.0.0", port=80, debug=True)

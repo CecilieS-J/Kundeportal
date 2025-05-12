@@ -15,7 +15,7 @@
         </li>
         
 
-        {# Kundeopslag-dropdown #}
+        {# Customer search-dropdown #}
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
              data-bs-toggle="dropdown" aria-expanded="false">
@@ -24,17 +24,17 @@
           <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
             <li>
               <abbr title="…you wish">
-                <a class="dropdown-item" href="{{ url_for('aggregator.search_customers_mdm') }}">Søg kunde i MDM</a>
+                <a class="dropdown-item" href="{{ url_for('external_customer.search_customers_mdm') }}">Søg kunde i MDM</a>
                 <li><hr class="dropdown-divider"></li>
               </abbr>
               <abbr title="Vis eventlog for én eller flere kunder">
-                <a class="dropdown-item" href="{{ url_for('aggregator.event_log') }}">Event-log</a>
+                <a class="dropdown-item" href="{{ url_for('external_customer.event_log') }}">Event-log</a>
               </abbr>
             </li>
           </ul>
         </li>
 
-        {# Datakvalitet-dropdown #}
+        {# Data quality-dropdown #}
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
              data-bs-toggle="dropdown" aria-expanded="false">
@@ -43,30 +43,30 @@
           <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
             <li>
               <abbr title="Udtrækker alle kunder, der mangler i mindst ét system">
-                <a class="dropdown-item" href="{{ url_for('aggregator.search_customers_mdm') }}">Manglende kunder</a>
+                <a class="dropdown-item" href="{{ url_for('external_customer.search_customers_mdm') }}">Manglende kunder</a>
                 <li><hr class="dropdown-divider"></li>
               </abbr>
               <abbr title="Identificér dubletter i Brevo baseret på e-mail og SIB ID">
-                <a class="dropdown-item" href="{{ url_for('aggregator.search_customers_mdm') }}">Dubletter i Brevo</a>
+                <a class="dropdown-item" href="{{ url_for('external_customer.search_customers_mdm') }}">Dubletter i Brevo</a>
                 <li><hr class="dropdown-divider"></li>
               </abbr>
               <abbr title="Valider e-mailadresser på tværs af systemer for syntaks og API-status">
-                <a class="dropdown-item" href="{{ url_for('aggregator.search_customers_mdm') }}">Ugyldig e-mails</a>
+                <a class="dropdown-item" href="{{ url_for('external_customer.search_customers_mdm') }}">Ugyldig e-mails</a>
                 <li><hr class="dropdown-divider"></li>
               </abbr>
               <abbr title="Sammenlign felter som navn, e-mail og ID’er på tværs af MDM, SFCC, Omneo og Brevo">
-                <a class="dropdown-item" href="{{ url_for('aggregator.search_customers_mdm') }}">Sammenlign kundedata</a>
+                <a class="dropdown-item" href="{{ url_for('external_customer.search_customers_mdm') }}">Sammenlign kundedata</a>
                 <li><hr class="dropdown-divider"></li>
               </abbr>
               <abbr title="Kontroller sletning af kunder i alle systemer i henhold til GDPR’s retten-till-at-blive-glemt">
-                <a class="dropdown-item" href="{{ url_for('aggregator.search_customers_mdm') }}">GDPR-sletning</a>
+                <a class="dropdown-item" href="{{ url_for('external_customer.search_customers_mdm') }}">GDPR-sletning</a>
               </abbr>
             </li>
           </ul>
         </li>
 
 
-        {# Administration kun for dataansvarlig #}
+         {# Administration menu, only for data responsible users #}
         {% if current_user.role == UserRole.dataansvarlig %}
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button"
@@ -82,7 +82,7 @@
         {% endif %}
       </ul>
 
-      {# Log ud til højre #}
+      {# Logout button on the right #}
       <ul class="navbar-nav ml-auto">
         <li class="nav-item">
           <a class="nav-link" href="{{ url_for('auth.logout') }}">Log ud</a>
