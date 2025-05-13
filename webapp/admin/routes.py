@@ -22,7 +22,7 @@ admin_mail_logger.setLevel(logging.DEBUG)
 
 @admin_bp.route('/users', methods=['GET'])
 @login_required
-@require_roles(UserRole.dataansvarlig)
+@require_roles(UserRole.admin)
 def list_users():
     q = request.args.get('q','')
     users = User.query.filter(User.username.contains(q)).all() if q else User.query.all()
@@ -30,7 +30,7 @@ def list_users():
 
 @admin_bp.route('/users/create', methods=['GET','POST'])
 @login_required
-@require_roles(UserRole.dataansvarlig)
+@require_roles(UserRole.admin)
 def create_user():
     form = CreateUserForm()
     if form.validate_on_submit():
@@ -58,7 +58,7 @@ def create_user():
                 f"Kære {u.username},\n\n"
                 "Din bruger i Kundeportalen er nu oprettet.\n"
                 f"Brugernavn: {u.username}\n"
-                f"Adgangskode: {default_pw}\n\n"
+                f"Adgangskode er blevet udleveret\n\n"
                 "Når du logger ind første gang, vil du blive bedt om at ændre din adgangskode.\n\n"
                 "Venlig hilsen\n"
                 "IT-support"
@@ -75,7 +75,7 @@ def create_user():
 
 @admin_bp.route('/users/edit/<int:user_id>', methods=['GET','POST'])
 @login_required
-@require_roles(UserRole.dataansvarlig)
+@require_roles(UserRole.admin)
 def edit_user(user_id):
     u = User.query.get_or_404(user_id)
 
@@ -111,7 +111,7 @@ def edit_user(user_id):
 
 @admin_bp.route('/users/delete/<int:user_id>', methods=['POST'])
 @login_required
-@require_roles(UserRole.dataansvarlig)
+@require_roles(UserRole.admin)
 def delete_user(user_id):
     User.query.filter_by(id=user_id).delete()
     db.session.commit()
@@ -120,7 +120,7 @@ def delete_user(user_id):
 
 @admin_bp.route('/login-history')
 @login_required
-@require_roles(UserRole.dataansvarlig)
+@require_roles(UserRole.admin)
 def login_history():
     entries = LoginHistory.query.order_by(LoginHistory.timestamp.desc()).limit(100).all()
     return render_template('admin/login_history.html', entries=entries)
@@ -128,7 +128,7 @@ def login_history():
 
 @admin_bp.route('/admin/cleanup-logs')
 @login_required
-@require_roles(UserRole.dataansvarlig)
+@require_roles(UserRole.admin)
 def cleanup_logs():
 
     log_path = os.path.join('logs', 'cleanup.log')

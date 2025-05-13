@@ -12,7 +12,7 @@
         </tr>
       </thead>
       <tbody>
-        {% for field in ['customer_id', 'last_name', 'email', 'omneo_id', 'customer_no', 'sib_id', 'clientela_id'] %}
+        {% for field in ['customer_id', 'first_name', 'last_name', 'email', 'omneo_id', 'customer_no', 'sib_id', 'clientela_id'] %}
         <tr>
           <td>{{ field.replace('_', ' ').capitalize() }}</td>
           <td>{{ external[field] or '–' }}</td>

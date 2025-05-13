@@ -16,6 +16,7 @@ class CustomerExternalService:
             SELECT
               jsonb_pretty(data)       AS data_pretty,
               customer_id,
+              data->>'first_name'      AS First_name,
               data->>'last_name'       AS last_name,
               data->>'email'           AS email,
               data->>'omneo_id'        AS omneo_id,
@@ -55,7 +56,7 @@ class CustomerExternalService:
     
     
 
-    def fetch_event_log(self, goodie_id=None, customer_no=None, email=None, sib_id=None, phone=None):
+    def fetch_event_log(self, goodie_id=None, customer_no=None, email=None):
          # Determine which parameter to use in WHERE clause
         if goodie_id:
             where = "event_data->>'c_goodieCardNumber' = :val"
@@ -76,6 +77,7 @@ class CustomerExternalService:
               type::text                     AS type,       -- cast enum to text
               src_system::text               AS system,     -- also cast enum to text
               event_data->>'email'           AS email,
+              event_data->>'first_name'            AS First_name,
               event_data                     AS data_json
             FROM "event"
             WHERE {where}

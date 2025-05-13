@@ -7,7 +7,7 @@ from datetime import datetime, timedelta, timezone
 from sqlalchemy.dialects.sqlite import JSON
 
 class UserRole(enum.Enum):
-    dataansvarlig = "dataansvarlig"
+    admin = "admin"
     it_supporter  = "it_supporter"
     watcher       = "watcher"
 

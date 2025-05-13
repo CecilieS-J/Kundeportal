@@ -7,7 +7,10 @@ from webapp.models import UserRole, User
 
 
 class CreateUserForm(FlaskForm):
-    """Admin-opretter af ny bruger. Kodeord sættes automatisk til Magasin2025."""
+    """
+    Admin form for creating a new user.
+    The password is automatically set to 'Magasin2025'.
+    """
     username = StringField(
         'Personalnummer',
         validators=[
@@ -33,6 +36,10 @@ class CreateUserForm(FlaskForm):
 
     
 class EditUserForm(FlaskForm):
+    """
+    Admin form for editing an existing user.
+    Username is read-only. Password change is optional.
+    """
     username = StringField('Personalnummer', render_kw={'readonly': True})
     password = PasswordField('Ny adgangskode', validators=[])
     confirm  = PasswordField('Gentag adgangskode',

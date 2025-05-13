@@ -23,6 +23,7 @@
           <th>Type</th>
           <th>System</th>
           <th>Email</th>
+          <th>First name</th>
           <th>Data (JSON)</th>
         </tr>
       </thead>
@@ -34,6 +35,7 @@
           <td>{{ ev.type }}</td>
           <td>{{ ev.system }}</td>
           <td>{{ ev.email or '–' }}</td>
+          <td>{{ ev.first_name or '–' }}</td>
           <td>
             <details>
               <summary>Vis JSON</summary>

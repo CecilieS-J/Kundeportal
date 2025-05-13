@@ -5,7 +5,7 @@ from webapp import app, db
 from webapp.models import User, UserRole
 
 with app.app_context():
-    username = "dataansvarlig"
+    username = "admin"
     existing = User.query.filter_by(username=username).first()
     if existing:
         print(f"Bruger '{username}' findes allerede—hopper over oprettelse.")
@@ -14,7 +14,7 @@ with app.app_context():
         admin = User(
             username=username,
             password_hash=pw_hash,
-            role=UserRole.dataansvarlig
+            role=UserRole.admin
         )
         db.session.add(admin)
         db.session.commit()
