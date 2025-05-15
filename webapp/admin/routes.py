@@ -1,10 +1,11 @@
 # webapp/admin/routes.py
+from secrets import token_urlsafe
 import os
 from webapp.admin import admin_bp
 from flask import render_template, redirect, url_for, flash, request
 from werkzeug.security import generate_password_hash
 from flask_login import login_required
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from webapp import db
 from webapp.models import User, UserRole, LoginHistory
 from webapp.auth.utils import require_roles
@@ -33,43 +34,62 @@ def list_users():
 @require_roles(UserRole.admin)
 def create_user():
     form = CreateUserForm()
-    if form.validate_on_submit():
-        default_pw = "Magasin2025"
-        now = datetime.now(timezone.utc)
 
+    if form.validate_on_submit():
+        # 1) Generer token + udløbstid (24 timer)
+        token = token_urlsafe(32)
+        expires = datetime.utcnow() + timedelta(hours=24)
+
+        # 2) Opret bruger UDEN password i databasen
         u = User(
             username=form.username.data,
-            email=form.email.data, 
-            password_hash=generate_password_hash(default_pw),
+            email=form.email.data,
+            password_hash=None,
             role=UserRole[form.role.data],
-            pw_changed_at=now,
-            pw_expires_at=now
+            pw_changed_at=None,
+            pw_expires_at=None,
+            secret_token=token,
+            secret_token_expires_at=expires
         )
         db.session.add(u)
         try:
             db.session.commit()
-        except IntegrityError:
+        except IntegrityError as exc:
             db.session.rollback()
-            form.username.errors.append('Brugernavn optaget')
+            # Tjek om det er e-mail eller username der konflikerer
+            msg = str(exc.orig).lower()
+            if 'email' in msg:
+                form.email.errors.append('E-mail optaget')
+            else:
+                form.username.errors.append('Brugernavn optaget')
         else:
-            # Send velkomst-mail
-            subject = "Din bruger er oprettet"
+            # 3) Byg aktiveringslink
+            activation_link = url_for('auth.activate', token=token, _external=True)
+
+            # 4) Send mail via Mailgun
+            subject = "Aktivér din konto i Kundeportalen"
             body = (
                 f"Kære {u.username},\n\n"
-                "Din bruger i Kundeportalen er nu oprettet.\n"
-                f"Brugernavn: {u.username}\n"
-                f"Adgangskode er blevet udleveret\n\n"
-                "Når du logger ind første gang, vil du blive bedt om at ændre din adgangskode.\n\n"
+                f"Dit brugernavn er: {u.username}\n\n"
+                "Din bruger er oprettet og skal nu aktiveres.\n\n"
+                f"Klik på dette link for at vælge et kodeord og aktivere kontoen:\n"
+                f"{activation_link}\n\n"
+                "Linket udløber om 24 timer.\n\n"
                 "Venlig hilsen\n"
                 "IT-support"
             )
             try:
                 send_alert(subject, [u.email], body)
-                flash(f"Bruger oprettet og mail sendt til {u.email}", "success")
+                flash(f"Bruger oprettet – aktiveringslink sendt til {u.email}", "success")
             except Exception:
-                flash("Bruger oprettet, men fejl ved afsendelse af velkomst-mail", "warning")
+                flash("Bruger oprettet, men kunne ikke sende aktiveringsmail.", "warning")
 
             return redirect(url_for('admin.list_users'))
+
+    else:
+        # Debug: vis præcist hvilke valideringsfejl der er
+        admin_mail_logger.debug("[admin:create_user] validate_on_submit() returnerede False")
+        admin_mail_logger.debug(f"[admin:create_user] form.errors = {form.errors!r}")
 
     return render_template('admin/create_user.html', form=form)
 

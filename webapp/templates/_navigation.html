@@ -33,7 +33,23 @@
             </li>
           </ul>
         </li>
+        {# Brevo service-dropdown #}
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="brevoDropdown" role="button"
+             data-bs-toggle="dropdown" aria-expanded="false">
+            Brevo
+          </a>
+          <ul class="dropdown-menu" aria-labelledby="brevoDropdown">
+            <li>
+              <abbr title="Slå kundeoplysninger op i Brevo via e-mail">
+          <a class="dropdown-item" href="{{ url_for('brevo_service.lookup_contact') }}">Opslag i Brevo</a>
+              </abbr>
+            </li>
+            {# Du kan tilføje flere punkter her senere som Dublet-check, Subscription-status, etc. #}
+          </ul>
+        </li>
 
+        
         {# Data quality-dropdown #}
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
@@ -55,7 +71,7 @@
                 <li><hr class="dropdown-divider"></li>
               </abbr>
               <abbr title="Sammenlign felter som navn, e-mail og ID’er på tværs af MDM, SFCC, Omneo og Brevo">
-                <a class="dropdown-item" href="{{ url_for('external_customer.search_customers_mdm') }}">Sammenlign kundedata</a>
+                <a class="dropdown-item" href="{{ url_for('aggregator.compare_customer') }}">Sammenlign kundedata</a>
                 <li><hr class="dropdown-divider"></li>
               </abbr>
               <abbr title="Kontroller sletning af kunder i alle systemer i henhold til GDPR’s retten-till-at-blive-glemt">

@@ -31,11 +31,21 @@ class Settings(BaseSettings):
     REMEMBER_COOKIE_HTTPONLY: bool = True
     PERMANENT_SESSION_LIFETIME: timedelta = timedelta(minutes=30)
 
-    
-
     # Mailgun HTTP API credentials
     MAILGUN_DOMAIN: str              
-    MAILGUN_API_KEY: str             
+    MAILGUN_API_KEY: str     
+
+    # 🔽 Brevo settings
+    BREVO_API_KEY: str
+
+    # 🔽 SFCC settings (til token)
+    SFCC_CLIENT_ID: str
+    SFCC_CLIENT_SECRET: str
+    SFCC_BASE_URL: AnyUrl = "https://your-sfcc-instance.demandware.net"
+
+    # 🔽 Omneo settings
+    OMNEO_API_KEY: str
+    OMNEO_BASE_URL: AnyUrl = "https://api.omneo.io/v1"        
 
     class Config:
         # Configuration for loading environment variables from the .env file

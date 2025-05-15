@@ -36,3 +36,23 @@ class ChangePasswordForm(FlaskForm):
         ]
     )
     submit = SubmitField('Skift adgangskode')
+
+class ActivateForm(FlaskForm):
+    password = PasswordField(
+        'Adgangskode',
+        validators=[
+            DataRequired(),
+            Length(min=8, message="Mindst 8 tegn"),
+            Regexp(r'.*[A-Z].*', message="Mindst ét stort bogstav"),
+            Regexp(r'.*\d.*', message="Mindst ét tal"),
+            Regexp(r'.*\W.*', message="Mindst ét specialtegn")
+        ]
+    )
+    confirm = PasswordField(
+        'Gentag adgangskode',
+        validators=[
+            DataRequired(),
+            EqualTo('password', message='Kodeord skal matche')
+        ]
+    )
+    submit = SubmitField('Aktivér konto')

@@ -1,0 +1,41 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+  <h2>Sammenlign kundedata</h2>
+
+  <form method="get" action="{{ url_for('aggregator.compare_customer') }}" class="mb-4">
+      <div class="input-group">
+          <input type="text" class="form-control" name="goodie_id" placeholder="Indtast GoodieCard-nummer" required>
+          <button type="submit" class="btn btn-primary">Søg</button>
+      </div>
+  </form>
+
+  {% if profile %}
+    <table class="table table-striped">
+        <thead>
+            <tr>
+              <th>Felt</th>
+              <th>MDM</th>
+              <th>Brevo</th>
+              <th>SFCC</th>
+              <th>Omneo</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for field, values in profile.items() %}
+            <tr>
+              <td>{{ field }}</td>
+              <td>{{ values.get('MDM', '–') }}</td>
+              <td>{{ values.get('Brevo', '–') }}</td>
+              <td>{{ values.get('SFCC', '–') }}</td>
+              <td>{{ values.get('Omneo', '–') }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+  {% elif request.args.get('goodie_id') %}
+    <div class="alert alert-warning">Ingen data fundet for GoodieCard {{ request.args.get('goodie_id') }}.</div>
+  {% endif %}
+
+  <a href="{{ url_for('aggregator.compare_customer') }}" class="btn btn-secondary">Ny søgning</a>
+{% endblock %}

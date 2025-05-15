@@ -7,12 +7,16 @@ from flask_talisman import Talisman
 from config import settings
 from datetime import datetime, timezone
 from flask_apscheduler import APScheduler
-
-
+from flask import Flask, redirect, url_for, request
 from scripts.cli import seed_stale_user, clean_users_command
 
 # Create Flask app instance
 app = Flask(__name__, template_folder="templates", instance_relative_config=True)
+
+##debug
+# Set up logging
+import logging
+logging.basicConfig(level=logging.DEBUG)
 
 # Add custom CLI commands
 app.cli.add_command(seed_stale_user)
@@ -174,11 +178,17 @@ def inject_user_role():
 # Import and register blueprints in desired order
 from webapp.auth         import auth_bp
 from webapp.admin        import admin_bp
-from webapp.external_customer_service import external_customer_service_bp
+from webapp.services.external_customer_service.routes import external_customer_service_bp
 from webapp.routes       import public_bp
+from webapp.aggregator.routes import aggregator_bp
 
+from webapp.services.brevo_service import brevo_service_bp
+app.register_blueprint(brevo_service_bp)
+
+
+app.register_blueprint(aggregator_bp)
 app.register_blueprint(auth_bp)           # login/logout
 app.register_blueprint(admin_bp)          # /admin/*
 app.register_blueprint(external_customer_service_bp)   # /external_customer/*
-app.register_blueprint(public_bp)         # fx /barcodes
+app.register_blueprint(public_bp)         
 

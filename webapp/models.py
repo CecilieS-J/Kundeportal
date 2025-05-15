@@ -7,7 +7,7 @@ from datetime import datetime, timedelta, timezone
 from sqlalchemy.dialects.sqlite import JSON
 
 class UserRole(enum.Enum):
-    admin = "admin"
+    admin         = "admin"
     it_supporter  = "it_supporter"
     watcher       = "watcher"
 
@@ -16,7 +16,7 @@ class User(UserMixin, db.Model):
     id            = db.Column(db.Integer, primary_key=True)
     username      = db.Column(db.String(64), unique=True, nullable=False)
     email         = db.Column(db.String(120), unique=True, nullable=False)
-    password_hash = db.Column(db.String(128), nullable=False)
+    password_hash = db.Column(db.String(128), nullable=True)
     role          = db.Column(db.Enum(UserRole), nullable=False)
     created_at    = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     pw_changed_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
@@ -24,6 +24,10 @@ class User(UserMixin, db.Model):
         db.DateTime,
         default=lambda: datetime.now(timezone.utc) + timedelta(days=14)
     )
+
+    ##MFA
+    secret_token = db.Column(db.String(64), nullable=True)
+    secret_token_expires_at = db.Column(db.DateTime, nullable=True)
 
 class Customer(db.Model):
     __tablename__ = 'customer'

@@ -1,35 +1,59 @@
 {% extends 'layout.html' %}
+
 {% block content %}
   <h2>Opret bruger</h2>
-  <form method="post">
+
+  {# 1) Flash-beskeder #}
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, msg in messages %}
+        <div class="alert alert-{{ 'danger' if category=='warning' else category }}">
+          {{ msg }}
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  {# 2) Samlet oversigt over form.errors #}
+  {% if form.errors %}
+    <div class="alert alert-danger">
+      <ul class="mb-0">
+        {% for field, errors in form.errors.items() %}
+          {% for err in errors %}
+            <li><strong>{{ form[field].label.text }}:</strong> {{ err }}</li>
+          {% endfor %}
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+
+  <form method="post" novalidate>
     {{ form.hidden_tag() }}
 
-    <div class="form-group">
+    <div class="mb-3">
       {{ form.username.label(class="form-label") }}
-      {{ form.username(class="form-control") }}
+      {{ form.username(class="form-control", placeholder="Indtast personalenummer") }}
       {% for err in form.username.errors %}
-        <div class="text-danger">{{ err }}</div>
+        <div class="text-danger small">{{ err }}</div>
       {% endfor %}
     </div>
 
-    <div class="form-group">
+    <div class="mb-3">
       {{ form.email.label(class="form-label") }}
-      {{ form.email(class="form-control") }}
+      {{ form.email(class="form-control", placeholder="brugernavn@eksempel.dk") }}
       {% for err in form.email.errors %}
-        <div class="text-danger">{{ err }}</div>
+        <div class="text-danger small">{{ err }}</div>
       {% endfor %}
     </div>
 
-    <div class="form-group">
+    <div class="mb-3">
       {{ form.role.label(class="form-label") }}
-      {{ form.role(class="form-control") }}
+      {{ form.role(class="form-select") }}
       {% for err in form.role.errors %}
-        <div class="text-danger">{{ err }}</div>
+        <div class="text-danger small">{{ err }}</div>
       {% endfor %}
     </div>
 
-    <div class="form-group">
-      {{ form.submit(class="btn btn-primary") }}
-    </div>
+    <button type="submit" class="btn btn-primary">{{ form.submit.label.text }}</button>
   </form>
 {% endblock %}
