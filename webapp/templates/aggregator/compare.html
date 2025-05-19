@@ -4,6 +4,7 @@
   <h2>Sammenlign kundedata</h2>
 
   <form method="get" action="{{ url_for('aggregator.compare_customer') }}" class="mb-4">
+    {{ form.hidden_tag() }}
       <div class="input-group">
           <input type="text" class="form-control" name="goodie_id" placeholder="Indtast GoodieCard-nummer" required>
           <button type="submit" class="btn btn-primary">Søg</button>

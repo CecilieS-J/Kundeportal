@@ -1,0 +1,21 @@
+{% extends 'layout.html' %}
+{% block content %}
+  <h2>Omneo Customer Lookup</h2>
+
+  <form method="get" action="{{ url_for('omneo_service.lookup_customer') }}">
+    {{ form.hidden_tag() }}
+      <input type="text" name="query" placeholder="Email eller Omneo ID" required>
+      <button type="submit">Søg</button>
+  </form>
+
+  {% if result %}
+    <h3>Resultat</h3>
+    <table class="table table-striped">
+        {% for key, value in result.items() %}
+        <tr><td>{{ key }}</td><td>{{ value or '–' }}</td></tr>
+        {% endfor %}
+    </table>
+  {% elif request.args.get('query') %}
+    <div class="alert alert-warning">Ingen kunde fundet: {{ request.args.get('query') }}</div>
+  {% endif %}
+{% endblock %}

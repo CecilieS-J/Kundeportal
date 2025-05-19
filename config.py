@@ -1,9 +1,10 @@
 import os
 from dotenv import load_dotenv
-load_dotenv()
 from pydantic_settings import BaseSettings
 from pydantic import AnyUrl
 from datetime import timedelta
+load_dotenv()
+
 
 
 class Settings(BaseSettings):
@@ -41,11 +42,16 @@ class Settings(BaseSettings):
     # 🔽 SFCC settings (til token)
     SFCC_CLIENT_ID: str
     SFCC_CLIENT_SECRET: str
-    SFCC_BASE_URL: AnyUrl = "https://your-sfcc-instance.demandware.net"
+    SFCC_USER: str
+    SFCC_PASSWORD: str
+    SFCC_AUTH_TYPE: str 
+    SFCC_INSTANCE: str
+
 
     # 🔽 Omneo settings
     OMNEO_API_KEY: str
-    OMNEO_BASE_URL: AnyUrl = "https://api.omneo.io/v1"        
+    OMNEO_BASE_URL: str
+        
 
     class Config:
         # Configuration for loading environment variables from the .env file
@@ -54,3 +60,11 @@ class Settings(BaseSettings):
 
 # Single global instance of Settings
 settings = Settings()
+
+# ✅ Legacy alias-style (til din gamle codebase)
+sfcc_client_id = settings.SFCC_CLIENT_ID
+sfcc_secret = settings.SFCC_CLIENT_SECRET
+sfcc_user = settings.SFCC_USER
+sfcc_password = settings.SFCC_PASSWORD
+sfcc_authType = settings.SFCC_AUTH_TYPE
+sfcc_instance = settings.SFCC_INSTANCE

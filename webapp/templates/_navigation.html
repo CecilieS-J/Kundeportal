@@ -8,18 +8,21 @@
     </button>
     <div class="collapse navbar-collapse" id="navbarToggle">
       <ul class="navbar-nav mr-auto">
-        <li class="nav-item">
+        <li class="nav-item mx-3">
           <abbr title="Gå til din forside">
-            <a class="nav-link" href="{{ url_for('public.home') }}">Hjem</a>
+            <a class="nav-link" href="{{ url_for('public.home') }}">
+           <img src="{{ url_for('static', filename='favicon.ico') }}" alt="Home" style="height: 20px;">
+            </a>
+
           </abbr>
         </li>
         
 
         {# Customer search-dropdown #}
-        <li class="nav-item dropdown">
+        <li class="nav-item dropdown  nav-item-spacing">
           <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
              data-bs-toggle="dropdown" aria-expanded="false">
-            Kundeopslag
+            MDM
           </a>
           <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
             <li>
@@ -41,11 +44,44 @@
           </a>
           <ul class="dropdown-menu" aria-labelledby="brevoDropdown">
             <li>
-              <abbr title="Slå kundeoplysninger op i Brevo via e-mail">
+              <abbr title="Slå kundeoplysninger op i Brevo">
           <a class="dropdown-item" href="{{ url_for('brevo_service.lookup_contact') }}">Opslag i Brevo</a>
               </abbr>
+              <abbr title="Identificér dubletter i Brevo baseret på e-mail og SIB ID">
+                <a class="dropdown-item" href="{{ url_for('external_customer.search_customers_mdm') }}">Dubletter i Brevo</a>
+                <li><hr class="dropdown-divider"></li>
+              </abbr>
             </li>
-            {# Du kan tilføje flere punkter her senere som Dublet-check, Subscription-status, etc. #}
+          </ul>
+        </li>
+
+        {# Salesforce service-dropdown #}
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="brevoDropdown" role="button"
+             data-bs-toggle="dropdown" aria-expanded="false">
+            Salesforce
+          </a>
+          <ul class="dropdown-menu" aria-labelledby="brevoDropdown">
+            <li>
+              <abbr title="Slå kundeoplysninger op i Salesforce">
+          <a class="dropdown-item" href="{{ url_for('sfcc_service.lookup_customer') }}">Opslag i Salesforce</a>
+              </abbr>
+            </li>
+          </ul>
+        </li>
+
+        {# Omneo service-dropdown #}
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="brevoDropdown" role="button"
+             data-bs-toggle="dropdown" aria-expanded="false">
+            Omneo
+          </a>
+          <ul class="dropdown-menu" aria-labelledby="brevoDropdown">
+            <li>
+              <abbr title="Slå kundeoplysninger op i Brevo">
+          <a class="dropdown-item" href="{{ url_for('omneo_service.lookup_customer') }}">Opslag i Omneo</a>
+              </abbr>
+            </li>
           </ul>
         </li>
 
@@ -59,11 +95,7 @@
           <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
             <li>
               <abbr title="Udtrækker alle kunder, der mangler i mindst ét system">
-                <a class="dropdown-item" href="{{ url_for('external_customer.search_customers_mdm') }}">Manglende kunder</a>
-                <li><hr class="dropdown-divider"></li>
-              </abbr>
-              <abbr title="Identificér dubletter i Brevo baseret på e-mail og SIB ID">
-                <a class="dropdown-item" href="{{ url_for('external_customer.search_customers_mdm') }}">Dubletter i Brevo</a>
+                <a class="dropdown-item" href="{{ url_for('external_customer.search_customers_mdm') }}">Auto kundeudtræk</a>
                 <li><hr class="dropdown-divider"></li>
               </abbr>
               <abbr title="Valider e-mailadresser på tværs af systemer for syntaks og API-status">

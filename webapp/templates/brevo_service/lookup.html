@@ -4,6 +4,7 @@
   <h2>Slå op i Brevo (e-mail eller SIB ID)</h2>
 
   <form method="get" action="{{ url_for('brevo_service.lookup_contact') }}" class="mb-4">
+    
       <div class="input-group">
           <input type="text" class="form-control" name="query" placeholder="Indtast e-mail eller SIB ID" required>
           <button type="submit" class="btn btn-primary">Søg</button>

@@ -181,11 +181,13 @@ from webapp.admin        import admin_bp
 from webapp.services.external_customer_service.routes import external_customer_service_bp
 from webapp.routes       import public_bp
 from webapp.aggregator.routes import aggregator_bp
-
 from webapp.services.brevo_service import brevo_service_bp
+from webapp.services.sfcc_service import sfcc_service_bp
+from webapp.services.omneo_service import omneo_service_bp
+
+app.register_blueprint(omneo_service_bp)
+app.register_blueprint(sfcc_service_bp)
 app.register_blueprint(brevo_service_bp)
-
-
 app.register_blueprint(aggregator_bp)
 app.register_blueprint(auth_bp)           # login/logout
 app.register_blueprint(admin_bp)          # /admin/*

@@ -1,0 +1,22 @@
+{% extends 'layout.html' %}
+{% block content %}
+  <h2>SFCC Customer Lookup</h2>
+
+
+  <form method="POST">
+    {{ form.hidden_tag() }}
+    {{ form.query.label }} {{ form.query(size=30) }}
+    {{ form.submit(class="btn btn-primary") }}
+  </form>
+
+  {% if result %}
+    <h3>Resultat</h3>
+    <table class="table table-striped">
+        {% for key, value in result.items() %}
+        <tr><td>{{ key }}</td><td>{{ value or '–' }}</td></tr>
+        {% endfor %}
+    </table>
+  {% elif request.method == 'POST' and form.validate() %}
+    <div class="alert alert-warning">Ingen kunde fundet.</div>
+  {% endif %}
+{% endblock %}
