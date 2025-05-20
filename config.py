@@ -49,9 +49,15 @@ class Settings(BaseSettings):
 
 
     # 🔽 Omneo settings
-    OMNEO_API_KEY: str
+    OMNEO_API_TOKEN: str
     OMNEO_BASE_URL: str
+
         
+    smseagle_url: str
+    smseagle_user: str
+    smseagle_pass: str
+
+    
 
     class Config:
         # Configuration for loading environment variables from the .env file

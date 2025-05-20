@@ -7,4 +7,4 @@ omneo_service_bp = Blueprint(
     template_folder='templates/omneo_service'
 )
 
-from webapp.services.omneo_service import routes
+from webapp.services.omneo_service import routes  # skal stå til sidst for at undgå cirkulær import

@@ -4,14 +4,14 @@ from flask import render_template, redirect, url_for, flash, request, session
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import check_password_hash, generate_password_hash
 from datetime import datetime, timedelta, timezone
-from .forms import LoginForm, ChangePasswordForm
+from .forms import LoginForm, ChangePasswordForm, OTPForm
 
 
 
 from webapp import db
 from webapp.models import User
 from webapp.auth import auth_bp
-from webapp.auth.utils import record_login
+from webapp.auth.utils import record_login, handle_login, verify_otp
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
@@ -20,46 +20,47 @@ def login():
 
     form = LoginForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(username=form.username.data).first()
-
-        if user and user.password_hash is None:
-            flash("Din konto er ikke aktiveret endnu. Tjek din mail for aktiveringslink.", "warning")
-            return redirect(url_for('auth.login'))
-
-        if user and check_password_hash(user.password_hash, form.password.data):
-            login_user(user)
-            record_login(user.id, request.remote_addr)
+        # Prøv at validere bruger + kodeord og sende OTP
+        user = handle_login(form.username.data, form.password.data)
+        if user:
+            # Gem bruger-id til OTP-verificering
+            session['otp_user_id'] = user.id
             session.permanent = True
 
-            # Consistent check for password expiration
-            expires = user.pw_expires_at    # always defined (can be None)
-            if expires is None:
-                must_change = True
-            else:
-                if expires.tzinfo is None:
-                    expires = expires.replace(tzinfo=timezone.utc)
-                must_change = expires <= datetime.now(timezone.utc)
-
-            if must_change:
-                return redirect(url_for('auth.change_password', next=request.args.get('next')))
-
-            next_page = request.args.get('next') or url_for('public.home')
-            return redirect(next_page)
-
-        flash("Forkert brugernavn eller kodeord", "danger")
+            flash("Der er nu sendt en SMS-kode til dit nummer. Indtast den for at logge ind.", "info")
+            print("Omdirigerer til verify_otp_route")  #  debug
+            return redirect(url_for('auth.verify_otp_route'))
+        else:
+            flash("Forkert brugernavn eller kodeord", "danger")
 
     return render_template('auth/login.html', form=form, title="Log ind")
+
+
+@auth_bp.route('/verify-otp', methods=['GET', 'POST'])
+def verify_otp_route():
+    user_id = session.get('otp_user_id')
+    if not user_id:
+        return redirect(url_for('auth.login'))
+
+    form = OTPForm()
+    if form.validate_on_submit():
+        user = verify_otp(user_id, form.otp.data)
+        if user:
+            login_user(user)
+            session.pop('otp_user_id', None)
+            return redirect(url_for('public.home'))  # eller dashboard etc.
+
+        flash("Ugyldig eller udløbet kode", "danger")
+
+    return render_template("auth/otp_form.html", form=form, title="Bekræft SMS-kode")
 
 
 @auth_bp.route('/logout')
 @login_required
 def logout():
-    """
-    Logs out the current user and redirects to the login page.
-    """
     logout_user()
-    flash("Du er nu logget ud", "info")
-    return redirect(url_for('auth.login'))
+    session.clear()  # valgfrit, men godt for at rydde alt
+    return render_template('auth/logged_out.html', title="Logget ud")
 
 
 @auth_bp.route('/change-password', methods=['GET', 'POST'])

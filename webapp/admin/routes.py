@@ -44,6 +44,7 @@ def create_user():
         u = User(
             username=form.username.data,
             email=form.email.data,
+            phone_number=form.phone_number.data,
             password_hash=None,
             role=UserRole[form.role.data],
             pw_changed_at=None,
@@ -110,6 +111,7 @@ def edit_user(user_id):
     if form.validate_on_submit():
         # Opdater enum ud fra den valgte string
         u.role = UserRole[form.role.data]
+        u.phone_number = form.phone_number.data
 
         # Hvis admin indtaster nyt password, så håndter det
         if form.password.data:

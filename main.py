@@ -4,7 +4,9 @@ import os
 import logging
 from webapp import app
 from backup_script import lav_backup  # Function to create DB backup
-from config import settings
+from scripts.cli import seed_admin
+app.cli.add_command(seed_admin)
+
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
@@ -79,6 +81,22 @@ def test_sfcc():
     # print(full_data)
 
 
+def test_omneo():
+    from webapp.services.omneo_service.service import OmneoService  
+
+    service = OmneoService()
+
+    # Test med GoodieCard ID
+    customer_id = "83017843"
+    result = service.fetch_member_by_id(customer_id)
+    print("GoodieCard result:", result)
+
+    # Test med e-mail
+    email = "magasintest+blocked@protonmail.com"
+    result = service.fetch_member_by_email(email)
+    print("Email result:", result)
+
+        
 def main():
     """
     Main entry point for running the Flask application.
@@ -89,11 +107,13 @@ def main():
     for rule in app.url_map.iter_rules():
         print(f"{rule.endpoint:30s} -> {rule}")
 
-    # Run optional test to verify SFCC integration works
-    test_sfcc()
-    
+    # Run optional test to verify SFCC integration or Omneo works
+    #test_sfcc()
+    #test_omneo()
 
+     
     try:
+        
         # Start Flask development server
         app.run(host='127.0.0.1', port=80, debug=True)
 

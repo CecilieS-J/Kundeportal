@@ -28,6 +28,13 @@ class CreateUserForm(FlaskForm):
             Length(max=120)
         ]
     )
+    phone_number = StringField(
+    "Telefonnummer",
+    validators=[
+        DataRequired(message="Telefonnummer er påkrævet"),
+        Length(min=8, max=20, message="Telefonnummer skal være mellem 8 og 20 tegn")
+        ]
+    )
     role = SelectField(
         'Rolle',
         choices=[(r.name, r.value) for r in UserRole]
@@ -67,6 +74,13 @@ class EditUserForm(FlaskForm):
     confirm = PasswordField(
         'Gentag adgangskode',
         validators=[EqualTo('password', message='Kodeord skal matche')]
+    )
+    phone_number = StringField(
+    "Telefonnummer",
+    validators=[
+        DataRequired(message="Telefonnummer er påkrævet"),
+        Length(min=8, max=20, message="Telefonnummer skal være mellem 8 og 20 tegn")
+        ]
     )
     role = SelectField(
         'Rolle',

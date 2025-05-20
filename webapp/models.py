@@ -5,6 +5,7 @@ from flask_login import UserMixin
 import enum
 from datetime import datetime, timedelta, timezone
 from sqlalchemy.dialects.sqlite import JSON
+from werkzeug.security import check_password_hash
 
 class UserRole(enum.Enum):
     admin         = "admin"
@@ -16,6 +17,7 @@ class User(UserMixin, db.Model):
     id            = db.Column(db.Integer, primary_key=True)
     username      = db.Column(db.String(64), unique=True, nullable=False)
     email         = db.Column(db.String(120), unique=True, nullable=False)
+    phone_number = db.Column(db.String(20), nullable=True)
     password_hash = db.Column(db.String(128), nullable=True)
     role          = db.Column(db.Enum(UserRole), nullable=False)
     created_at    = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
@@ -24,10 +26,16 @@ class User(UserMixin, db.Model):
         db.DateTime,
         default=lambda: datetime.now(timezone.utc) + timedelta(days=14)
     )
+    otp_code = db.Column(db.String(6), nullable=True)
+    otp_timestamp = db.Column(db.Integer, nullable=True)
 
     ##MFA
     secret_token = db.Column(db.String(64), nullable=True)
     secret_token_expires_at = db.Column(db.DateTime, nullable=True)
+    def check_password(self, password):
+        if self.password_hash is None:
+            return False
+        return check_password_hash(self.password_hash, password)
 
 class Customer(db.Model):
     __tablename__ = 'customer'
@@ -64,3 +72,9 @@ class LoginHistory(db.Model):
     timestamp    = db.Column(db.DateTime, default=datetime.utcnow)
     ip_address   = db.Column(db.String)
     user         = db.relationship('User', backref='login_history')
+
+
+def check_password(self, password):
+    if self.password_hash is None:
+        return False
+    return check_password_hash(self.password_hash, password)

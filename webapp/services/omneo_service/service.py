@@ -1,22 +1,17 @@
-from clients.omneo_client import get_omneo_customer
+from webapp.services.omneo_service.client import OmneoClient
 
 class OmneoService:
-    def fetch_customer(self, query):
-        # Forsøg at hente via omneo_id først
-        data = get_omneo_customer(omneo_id=query)
-        if not data:
-            # Hvis ikke, prøv via email
-            data = get_omneo_customer(email=query)
+    def __init__(self):
+        self.client = OmneoClient()
 
-        if not data:
-            return {}
+    def fetch_member_by_id(self, customer_id: str):
+        token = self.client.get_access_token(customer_id, "magento_id")
+        if token:
+            return self.client.get_customer_profile(token)
+        return None
 
-        return {
-            "omneo_id": data.get("omneo_id"),
-            "email": data.get("email"),
-            "first_name": data.get("first_name"),
-            "last_name": data.get("last_name"),
-            "phone": data.get("phone"),
-            "customer_no": data.get("customer_no"),
-            "created_at": data.get("created_at"),
-        }
+    def fetch_member_by_email(self, email: str):
+        token = self.client.get_access_token(email, "email")
+        if token:
+            return self.client.get_customer_profile(token)
+        return None

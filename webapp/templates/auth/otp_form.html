@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+{% block content %}
+  <form method="POST">
+    {{ form.hidden_tag() }}
+
+    <div class="mb-3">
+      {{ form.otp.label(class="form-label") }}
+      {{ form.otp(class="form-control", maxlength=6, placeholder="F.eks. 123456") }}
+      {% for err in form.otp.errors %}
+        <div class="text-danger small">{{ err }}</div>
+      {% endfor %}
+    </div>
+
+    <button type="submit" class="btn btn-primary">{{ form.submit.label.text }}</button>
+  </form>
+{% endblock %}

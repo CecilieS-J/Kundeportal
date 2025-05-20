@@ -32,12 +32,9 @@ app.config.update({
     "SESSION_COOKIE_SECURE": settings.SESSION_COOKIE_SECURE,
     "SESSION_COOKIE_HTTPONLY": settings.SESSION_COOKIE_HTTPONLY,
     "REMEMBER_COOKIE_SECURE": settings.REMEMBER_COOKIE_SECURE,
-    "REMEMBER_COOKIE_HTTPONLY": settings.REMEMBER_COOKIE_HTTPONLY,
+    "REMEMBER_COOKIE_HTTPONLY": settings.REMEMBER_COOKIE_HTTPONLY
     
 })
-
-
-
 
 # Content Security Policy (CSP) configuration for Talisman
 csp = {
@@ -80,7 +77,6 @@ csp = {
     'frame-src': ["'none'"]
 }
 
-
 # Enable HTTPS and security headers with Talisman
 Talisman(
     app,
@@ -89,7 +85,6 @@ Talisman(
     strict_transport_security=True,
     strict_transport_security_max_age=31536000
 )
-
 
 # Redirect root URL to login page
 @app.route('/')
@@ -140,7 +135,7 @@ def unauthorized_callback():
 # Before every request: enforce login except for allowed endpoints and static files
 @app.before_request
 def require_login():
-    allowed = ('auth.login', 'auth.logout', 'auth.change_password')
+    allowed = ('auth.login', 'auth.logout', 'auth.change_password','auth.verify_otp_route','auth.activate')
     is_static = (
         request.endpoint == 'static' or
         (request.endpoint and request.endpoint.endswith('.static'))

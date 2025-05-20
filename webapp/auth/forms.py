@@ -56,3 +56,8 @@ class ActivateForm(FlaskForm):
         ]
     )
     submit = SubmitField('Aktivér konto')
+
+
+class OTPForm(FlaskForm):
+    otp = StringField('SMS-kode', validators=[DataRequired(), Length(min=6, max=6)])
+    submit = SubmitField('Bekræft kode')

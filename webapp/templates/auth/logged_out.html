@@ -1,0 +1,14 @@
+{% extends 'layout.html' %}
+
+{% block title %}Logget ud{% endblock %}
+
+{% block content %}
+  <div class="row justify-content-center mt-5">
+    <div class="col-md-4 text-center">
+      <div class="alert alert-info">
+        Du er nu logget ud.
+      </div>
+      <a href="{{ url_for('auth.login') }}" class="btn btn-primary mt-3">Log ind igen</a>
+    </div>
+  </div>
+{% endblock %}
