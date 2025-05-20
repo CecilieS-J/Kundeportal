@@ -4,13 +4,12 @@ import config
 
 class SFCCService:
 
-    def fetch_customer_data(self, customer_no):
+     def fetch_customer_by_customer_no(self, customer_no):
         instance = "dev"
         country = "dk"
         site_id = "-"
-        list_id = f"mdn/customers/{customer_no}"
 
-        # Kun brug APIClientID
+        # Step 1: Authenticate using APIClientID
         token, _ = OCAPI_Authenticate_OAuth2(
             instance=instance,
             authType="APIClientID",
@@ -18,7 +17,8 @@ class SFCCService:
             sfcc_secret=config.sfcc_secret
         )
 
-        # Få alt data herfra
+        # Step 2: Get full customer object directly (no need for second API call)
+        list_id = f"mdn/customers/{customer_no}"
         customer_data = get_customer_lists(instance, config.sfcc_client_id, token, country, site_id, list_id)
 
         return customer_data
