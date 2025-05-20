@@ -1,22 +1,22 @@
 {% extends 'layout.html' %}
 {% block content %}
-  <h2>SFCC Customer Lookup</h2>
+  <!-- lookup.html -->
 
+<h2>Customer Lookup</h2>
 
-  <form method="POST">
-    {{ form.hidden_tag() }}
-    {{ form.query.label }} {{ form.query(size=30) }}
-    {{ form.submit(class="btn btn-primary") }}
-  </form>
+{% if result %}
+  <ul>
+    <li><strong>Customer ID:</strong> {{ result.customer_id }}</li>
+    <li><strong>Customer No:</strong> {{ result.customer_no }}</li>
+    <li><strong>Email:</strong> {{ result.email }}</li>
+    <li><strong>Name:</strong> {{ result.first_name }} {{ result.last_name }}</li>
+    <li><strong>Phone:</strong> {{ result.phone_home }}</li>
+    <li><strong>GoodieCard:</strong> {{ result.c_goodieCardNumber }}</li>
+    <li><strong>Tier:</strong> {{ result.c_goodieTierLevel }}</li>
+    <li><strong>Last Login:</strong> {{ result.last_login_time }}</li>
+  </ul>
+{% elif result is not none %}
+  <p>No customer found.</p>
+{% endif %}
 
-  {% if result %}
-    <h3>Resultat</h3>
-    <table class="table table-striped">
-        {% for key, value in result.items() %}
-        <tr><td>{{ key }}</td><td>{{ value or '–' }}</td></tr>
-        {% endfor %}
-    </table>
-  {% elif request.method == 'POST' and form.validate() %}
-    <div class="alert alert-warning">Ingen kunde fundet.</div>
-  {% endif %}
 {% endblock %}

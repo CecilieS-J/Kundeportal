@@ -11,23 +11,72 @@ logging.basicConfig(level=logging.DEBUG)
 
 
 def test_sfcc():
-    """
-    Optional test: Run SFCC token and customer lookup before starting the server.
-    Useful to verify API credentials work correctly.
-    """
-    from clients.sfcc_client import get_sfcc_token, get_sfcc_customer
+    import json
+    print("🔧 Running SFCC test...")
 
-    logging.info("Running SFCC test...")
+    # Settings og credentials
+    from config import sfcc_client_id, sfcc_secret, sfcc_user, sfcc_password, sfcc_instance
+    from webapp.services.sfcc_service.utils import get_customer_lists  # Vi bruger kun dette
+    from clients.sfcc_client import OCAPI_Authenticate_OAuth2
 
-    token = get_sfcc_token()
-    print("🔐 Access Token:", token)
+    instance = "dev"
+    country = "dk"
+    site_id = "-"
+    customer_no = "00258536"
+    list_id = f"mdn/customers/{customer_no}"
 
-    # Replace with a valid customer ID for testing
-    customer_id = "00258536"
-    result = get_sfcc_customer(customer_id)
+    # Step 1: Hent token via APIClientID
+    token, message = OCAPI_Authenticate_OAuth2(
+        instance=instance,
+        authType="APIClientID",
+        sfcc_client_id=sfcc_client_id,
+        sfcc_secret=sfcc_secret
+    )
+    print(f"🔐 Token (ClientID): {token}")
+    print(f"ℹ️ {message}")
 
-    print("👤 SFCC Customer Result:")
-    print(result)
+    # Step 2: Lookup på customer_id og alt anden relevant data
+    customer_data = get_customer_lists(instance, sfcc_client_id, token, country, site_id, list_id)
+
+    print("📄 Full customer_data from get_customer_lists():")
+    print(json.dumps(customer_data, indent=2))
+
+    # Udtræk specifikke felter
+    summary = {
+        "customer_id": customer_data.get("customer_id"),
+        "customer_no": customer_data.get("customer_no"),
+        "email": customer_data.get("email"),
+        "first_name": customer_data.get("first_name"),
+        "last_name": customer_data.get("last_name"),
+        "birthday": customer_data.get("birthday"),
+        "phone": customer_data.get("phone_home"),
+        "goodieCardNumber": customer_data.get("c_goodieCardNumber"),
+        "goodieTierLevel": customer_data.get("c_goodieTierLevel"),
+        "omneoMemberID": customer_data.get("c_omneoMemberID"),
+        "last_login_time": customer_data.get("last_login_time")
+    }
+
+    print("\n👤 SFCC Customer Summary:")
+    print(json.dumps(summary, indent=2))
+
+    # Step 3 og 4 er midlertidigt udkommenteret, da de fejler med 403:
+    #
+    # token, message = OCAPI_Authenticate_OAuth2(
+    #     instance=instance,
+    #     authType="BusinessManager",
+    #     sfcc_client_id=sfcc_client_id,
+    #     sfcc_secret=sfcc_secret,
+    #     sfcc_user=sfcc_user,
+    #     sfcc_password=sfcc_password
+    # )
+    # print(f"🔐 Token (BusinessManager): {token}")
+    # print(f"ℹ️ {message}")
+    #
+    # site_id = "DK"
+    # full_data = get_customer(instance, sfcc_client_id, token, country, site_id, customer_id)
+    #
+    # print("👤 SFCC Customer Result:")
+    # print(full_data)
 
 
 def main():
@@ -42,6 +91,7 @@ def main():
 
     # Run optional test to verify SFCC integration works
     test_sfcc()
+    
 
     try:
         # Start Flask development server

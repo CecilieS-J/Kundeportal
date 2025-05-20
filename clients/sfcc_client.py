@@ -94,3 +94,12 @@ if __name__ == "__main__":
     access_token, message = OCAPI_Authenticate_OAuth2(instance, sfcc_authType, sfcc_client_id, sfcc_secret, sfcc_user, sfcc_password)
     print(f"Access token: {access_token}")
     print(f"Message: {message}")
+
+
+
+
+
+
+
+
+   
