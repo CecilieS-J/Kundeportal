@@ -4,7 +4,8 @@ omneo_service_bp = Blueprint(
     'omneo_service',
     __name__,
     url_prefix='/omneo',
-    template_folder='templates/omneo_service'
+    template_folder='templates'  # ikke længere peger direkte på omneo_service/
 )
+
 
 from webapp.services.omneo_service import routes  # skal stå til sidst for at undgå cirkulær import

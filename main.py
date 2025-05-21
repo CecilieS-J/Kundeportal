@@ -2,6 +2,7 @@
 
 import os
 import logging
+import requests
 from webapp import app
 from backup_script import lav_backup  # Function to create DB backup
 from scripts.cli import seed_admin
@@ -96,6 +97,78 @@ def test_omneo():
     result = service.fetch_member_by_email(email)
     print("Email result:", result)
 
+
+def test_omneo_email():
+    import os
+    import json
+    import requests
+    from dotenv import load_dotenv
+
+    print("🔧 Running Omneo Email test...")
+
+    # Indlæs variabler fra .env
+    load_dotenv()
+    token = os.getenv("OMNEO_API_TOKEN")
+    base_url = os.getenv("OMNEO_BASE_URL")
+
+    if not token or not base_url:
+        print("❌ Mangler OMNEO_API_TOKEN eller OMNEO_BASE_URL. Tjek .env-filen.")
+        return
+
+    # Input
+    email = "magasintest+blocked@protonmail.com"  # Udskift med reel test-email
+
+    # Request
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json"
+    }
+    url = f"{base_url}/profiles?email={email}"
+    response = requests.get(url, headers=headers)
+
+    # Output
+    if response.status_code == 200:
+        print("✅ Brugerdata:")
+        print(json.dumps(response.json(), indent=2))
+    else:
+        print("❌ Fejl ved hentning af brugerdata:", response.status_code, response.text)
+
+  
+def test_omneo_card_pos():
+    import os
+    import json
+    import requests
+    from dotenv import load_dotenv
+
+    print("🔧 Running Omneo GoodieCard test...")
+
+    # Indlæs variabler fra .env
+    load_dotenv()
+    token = os.getenv("OMNEO_API_TOKEN")
+    base_url = os.getenv("OMNEO_BASE_URL")
+
+    if not token or not base_url:
+        print("❌ Mangler OMNEO_API_TOKEN eller OMNEO_BASE_URL. Tjek .env-filen.")
+        return
+
+    # Input
+    card_pos = "83017843"  
+
+    # Request
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json"
+    }
+    url = f"{base_url}/profiles?card_pos={card_pos}"
+    response = requests.get(url, headers=headers)
+
+    # Output
+    if response.status_code == 200:
+        print("✅ Brugerdata:")
+        print(json.dumps(response.json(), indent=2))
+    else:
+        print("❌ Fejl:", response.status_code, response.text)
+
         
 def main():
     """
@@ -110,6 +183,8 @@ def main():
     # Run optional test to verify SFCC integration or Omneo works
     #test_sfcc()
     #test_omneo()
+    #test_omneo_email()
+    #test_omneo_card_pos()
 
      
     try:

@@ -1,0 +1,15 @@
+{% extends 'layout.html' %}
+{% block content %}
+  <h2>Kundeprofil</h2>
+  <table class="table table-bordered">
+    <tr><th>Navn:</th><td>{{ profile.first_name }} {{ profile.last_name }}</td></tr>
+    <tr><th>Email:</th><td>{{ profile.email }}</td></tr>
+    <tr><th>Telefon:</th><td>{{ profile.phone }}</td></tr>
+    <tr><th>Køn:</th><td>{{ profile.gender }}</td></tr>
+    <tr><th>GoodieCard:</th><td>{{ profile.card_pos }}</td></tr>
+    <tr><th>SFCC ID:</th><td>{{ profile.sfcc_id }}</td></tr>
+    <tr><th>SIB ID:</th><td>{{ profile.sib_id }}</td></tr>
+    <tr><th>Omneo ID:</th><td>{{ profile.id }}</td></tr>
+  </table>
+  <a href="{{ url_for('omneo_service.lookup') }}" class="btn btn-secondary">Tilbage</a>
+{% endblock %}

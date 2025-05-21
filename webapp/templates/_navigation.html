@@ -46,10 +46,11 @@
             <li>
               <abbr title="Slå kundeoplysninger op i Brevo">
           <a class="dropdown-item" href="{{ url_for('brevo_service.lookup_contact') }}">Opslag i Brevo</a>
+              <li><hr class="dropdown-divider"></li>
               </abbr>
               <abbr title="Identificér dubletter i Brevo baseret på e-mail og SIB ID">
                 <a class="dropdown-item" href="{{ url_for('external_customer.search_customers_mdm') }}">Dubletter i Brevo</a>
-                <li><hr class="dropdown-divider"></li>
+
               </abbr>
             </li>
           </ul>
@@ -79,7 +80,7 @@
           <ul class="dropdown-menu" aria-labelledby="brevoDropdown">
             <li>
               <abbr title="Slå kundeoplysninger op i Omneo">
-          <a class="dropdown-item" href="{{ url_for('sfcc_service.lookup_customer') }}">Opslag i Omneo</a>
+          <a class="dropdown-item" href="{{ url_for('omneo_service.lookup') }}">Opslag i Omneo</a>
               </abbr>
             </li>
           </ul>

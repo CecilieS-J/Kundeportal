@@ -4,4 +4,4 @@ from wtforms.validators import DataRequired
 
 class SFCCLookupForm(FlaskForm):
     customer_no = StringField("Customer Number", validators=[DataRequired()])
-    submit = SubmitField("Lookup")
+    submit = SubmitField("Søg")
