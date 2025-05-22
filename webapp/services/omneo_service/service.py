@@ -1,5 +1,6 @@
 from webapp.services.omneo_service.client import OmneoClient
 
+
 class OmneoService:
     def __init__(self):
         self.client = OmneoClient()
@@ -15,33 +16,39 @@ class OmneoService:
             "gender": profile.get("gender"),
             "card_pos": identities.get("card_pos"),
             "sfcc_id": identities.get("sfcc_id"),
-            "sib_id": identities.get("sib_id"),
+            "sfcc_customer": identities.get("sfcc_customer", None),
+            
         }
 
     def fetch_by_email(self, email):
-        raw = self.client.get_profiles_by_email(email)
-        profiles = raw.get("data", []) if isinstance(raw, dict) else []
-        return [self._extract_profile_data(p) for p in profiles]
+        try:
+            profiles = self.client.get_profiles_by_email(email)
+            return [self._extract_profile_data(p) for p in profiles if p.get("email", "").lower() == email.lower()]
+        except Exception as e:
+            print(f"Fejl ved søgning efter email {email}: {e}")
+            return []
 
     def fetch_by_card_pos(self, card_pos):
-        raw = self.client.get_profiles_by_card_pos(card_pos)
-        profiles = raw.get("data", []) if isinstance(raw, dict) else []
-        return [self._extract_profile_data(p) for p in profiles]
+        profiles = self.client.get_profiles_by_card_pos(card_pos)
+        return [self._extract_profile_data(p) for p in profiles] if profiles else []
 
     def fetch_top_profiles(self, limit=10):
-        raw = self.client.get_profiles(limit=limit)
-        profiles = raw.get("data", []) if isinstance(raw, dict) else []
-        return [self._extract_profile_data(p) for p in profiles]
+        try:
+            raw = self.client.get_profiles(limit=limit)
+            profiles = raw.get("data", []) if isinstance(raw, dict) else []
+            return [self._extract_profile_data(p) for p in profiles]
+        except Exception as e:
+            print(f"Fejl ved hentning af profiler: {e}")
+            return []
 
     def fetch_profile_by_id(self, profile_id):
-        raw = self.client.get_profile_by_id(profile_id)
-        profile = raw.get("data") if isinstance(raw, dict) else None
-        return self._extract_profile_data(profile) if profile else None
+        try:
+            raw = self.client.get_profile_by_id(profile_id)
+            profile = raw.get("data") if isinstance(raw, dict) else None
+            return self._extract_profile_data(profile) if profile else None
+        except Exception as e:
+            print(f"Fejl ved hentning af profil {profile_id}: {e}")
+            return None
     
 
-
-
-    
    
-
-

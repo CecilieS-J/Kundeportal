@@ -1,4 +1,4 @@
-from flask import render_template
+from flask import render_template, redirect, url_for, request
 from webapp.services.omneo_service.forms import OmneoLookupForm
 from webapp.services.omneo_service.service import OmneoService
 from webapp.services.omneo_service import omneo_service_bp
@@ -9,25 +9,38 @@ def lookup():
     service = OmneoService()
     results = []
     error = None
-    search_mode = False  # Til at styre visning af top 10 eller søgeresultater
+    search_mode = False
 
-    if form.validate_on_submit():
+    if request.method == "POST" and form.validate_on_submit():
         query_value = form.query_value.data.strip()
         search_type = form.search_type.data
-        search_mode = True  # Vi har forsøgt at søge
+        search_mode = True
 
-        if search_type == 'email':
-            results = service.fetch_by_email(query_value)
-        elif search_type == 'card_pos':
-            results = service.fetch_by_card_pos(query_value)
-        else:
-            error = "Ugyldig søgetype."
+        try:
+            if search_type == "email":
+                results = service.fetch_by_email(query_value)
+            elif search_type == "card_pos":
+                results = service.fetch_by_card_pos(query_value)
+            else:
+                error = "Ugyldig søgetype."
+                search_mode = False
 
-        if not results:
-            error = "Ingen kunde fundet."
-    else:
-        # Kun hent top-profiler hvis det er en GET-request (første load)
-        results = service.fetch_top_profiles(limit=10)
+            if results:
+                if len(results) == 1:
+                    return redirect(url_for("omneo_service.profile_detail", profile_id=results[0]["id"]))
+                else:
+                    error = f"Fandt {len(results)} profiler. Forventede én."
+            else:
+                error = "Ingen kunde fundet for den angivne værdi."
+        except Exception as e:
+            error = f"Fejl under søgning: {str(e)}"
+            search_mode = False
+
+    elif request.method == "GET":
+        try:
+            results = service.fetch_top_profiles(limit=10)
+        except Exception as e:
+            error = f"Fejl ved hentning af profiler: {str(e)}"
 
     return render_template(
         "omneo_service/lookup.html",
@@ -36,9 +49,6 @@ def lookup():
         error=error,
         search_mode=search_mode
     )
-
-
-
 
 @omneo_service_bp.route("/lookup/profile/<profile_id>")
 def profile_detail(profile_id):
