@@ -1,4 +1,4 @@
-from clients.sfcc_client import OCAPI_Authenticate_OAuth2
+from webapp.services.sfcc_service.client import OCAPI_Authenticate_OAuth2
 from webapp.services.sfcc_service.utils import get_customer, get_customer_lists
 import config
 

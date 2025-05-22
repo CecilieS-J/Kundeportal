@@ -20,7 +20,7 @@ def test_sfcc():
     # Settings og credentials
     from config import sfcc_client_id, sfcc_secret, sfcc_user, sfcc_password, sfcc_instance
     from webapp.services.sfcc_service.utils import get_customer_lists  # Vi bruger kun dette
-    from clients.sfcc_client import OCAPI_Authenticate_OAuth2
+    from webapp.services.sfcc_service.client import OCAPI_Authenticate_OAuth2
 
     instance = "dev"
     country = "dk"

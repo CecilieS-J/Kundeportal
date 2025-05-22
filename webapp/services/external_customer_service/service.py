@@ -1,7 +1,7 @@
 # webapp/aggregator/service.py
 
 from sqlalchemy import text
-from clients.external_db import ExternalSession
+from webapp.services.external_customer_service.client import ExternalSession
 
 class CustomerExternalService:
     """

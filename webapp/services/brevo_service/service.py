@@ -1,4 +1,4 @@
-from clients.brevo_client import get_brevo_contact
+from webapp.services.brevo_service.client import get_brevo_contact
 
 class BrevoService:
     def fetch_contact(self, query):
