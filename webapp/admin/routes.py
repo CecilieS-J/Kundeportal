@@ -3,9 +3,7 @@ from secrets import token_urlsafe
 import os
 from webapp.admin import admin_bp
 from flask import render_template, redirect, url_for, flash, request
-from werkzeug.security import generate_password_hash
 from flask_login import login_required
-from datetime import datetime, timezone, timedelta
 from webapp import db
 from webapp.models import User, UserRole, LoginHistory
 from webapp.auth.utils import require_roles
@@ -13,6 +11,9 @@ from .forms import CreateUserForm, EditUserForm
 from webapp.mail import send_alert
 import logging
 from sqlalchemy.exc import IntegrityError
+from werkzeug.security import generate_password_hash
+from datetime import datetime, timedelta, timezone
+
 
 admin_mail_logger = logging.getLogger('admin-mail')
 handler = logging.StreamHandler()
@@ -27,7 +28,7 @@ admin_mail_logger.setLevel(logging.DEBUG)
 def list_users():
     q = request.args.get('q','')
     users = User.query.filter(User.username.contains(q)).all() if q else User.query.all()
-    return render_template('admin/users.html', users=users, q=q)
+    return render_template('users.html', users=users, q=q)
 
 @admin_bp.route('/users/create', methods=['GET','POST'])
 @login_required
@@ -38,7 +39,7 @@ def create_user():
     if form.validate_on_submit():
         # 1) Generer token + udløbstid (24 timer)
         token = token_urlsafe(32)
-        expires = datetime.utcnow() + timedelta(hours=24)
+        expires = datetime.now(timezone.utc) + timedelta(hours=12)
 
         # 2) Opret bruger UDEN password i databasen
         u = User(
@@ -92,7 +93,7 @@ def create_user():
         admin_mail_logger.debug("[admin:create_user] validate_on_submit() returnerede False")
         admin_mail_logger.debug(f"[admin:create_user] form.errors = {form.errors!r}")
 
-    return render_template('admin/create_user.html', form=form)
+    return render_template('create_user.html', form=form)
 
 @admin_bp.route('/users/edit/<int:user_id>', methods=['GET','POST'])
 @login_required
@@ -115,8 +116,7 @@ def edit_user(user_id):
 
         # Hvis admin indtaster nyt password, så håndter det
         if form.password.data:
-            from werkzeug.security import generate_password_hash
-            from datetime import datetime, timedelta, timezone
+            
 
             u.password_hash = generate_password_hash(form.password.data)
             now = datetime.now(timezone.utc)
@@ -128,7 +128,7 @@ def edit_user(user_id):
         return redirect(url_for('admin.list_users'))
 
     # 4) Render GET eller POST med validerings-errors
-    return render_template('admin/edit_user.html', form=form, user=u)
+    return render_template('edit_user.html', form=form, user=u)
 
 
 @admin_bp.route('/users/delete/<int:user_id>', methods=['POST'])
@@ -145,7 +145,7 @@ def delete_user(user_id):
 @require_roles(UserRole.admin)
 def login_history():
     entries = LoginHistory.query.order_by(LoginHistory.timestamp.desc()).limit(100).all()
-    return render_template('admin/login_history.html', entries=entries)
+    return render_template('login_history.html', entries=entries)
 
 
 @admin_bp.route('/admin/cleanup-logs')
@@ -160,4 +160,4 @@ def cleanup_logs():
     except FileNotFoundError:
         logs = "Ingen logfil fundet."
 
-    return render_template('admin/cleanup_logs.html', logs=logs)
+    return render_template('cleanup_logs.html', logs=logs)

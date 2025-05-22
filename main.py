@@ -1,12 +1,9 @@
-# main.py
-
 import os
 import logging
-import requests
 from webapp import app
-from backup_script import lav_backup  # Function to create DB backup
-from scripts.cli import seed_admin
-app.cli.add_command(seed_admin)
+from scripts.backup_script import run_backup
+from scripts.cleanup_backups import run_cleanup
+
 
 
 # Configure logging
@@ -196,7 +193,11 @@ def main():
         # Only run backup when the actual reloader process exits
         if os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
             print("📦 Application shutting down. Creating backup...")
-            lav_backup()
+            run_backup()
+            run_cleanup()
+            print("🗑️  Backup and cleaning done...")
+           
+
 
 
 # Only run if executed directly (not when imported as module)

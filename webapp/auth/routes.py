@@ -2,7 +2,7 @@
 
 from flask import render_template, redirect, url_for, flash, request, session
 from flask_login import login_user, logout_user, login_required, current_user
-from werkzeug.security import check_password_hash, generate_password_hash
+from werkzeug.security import generate_password_hash
 from datetime import datetime, timedelta, timezone
 from .forms import LoginForm, ChangePasswordForm, OTPForm
 
@@ -11,7 +11,7 @@ from .forms import LoginForm, ChangePasswordForm, OTPForm
 from webapp import db
 from webapp.models import User
 from webapp.auth import auth_bp
-from webapp.auth.utils import record_login, handle_login, verify_otp
+from webapp.auth.utils import handle_login, verify_otp
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
@@ -33,7 +33,7 @@ def login():
         else:
             flash("Forkert brugernavn eller kodeord", "danger")
 
-    return render_template('auth/login.html', form=form, title="Log ind")
+    return render_template('login.html', form=form, title="Log ind")
 
 
 @auth_bp.route('/verify-otp', methods=['GET', 'POST'])
@@ -52,15 +52,15 @@ def verify_otp_route():
 
         flash("Ugyldig eller udløbet kode", "danger")
 
-    return render_template("auth/otp_form.html", form=form, title="Bekræft SMS-kode")
+    return render_template("otp_form.html", form=form, title="Bekræft SMS-kode")
 
 
 @auth_bp.route('/logout')
 @login_required
 def logout():
     logout_user()
-    session.clear()  # valgfrit, men godt for at rydde alt
-    return render_template('auth/logged_out.html', title="Logget ud")
+    session.clear()  
+    return render_template('logged_out.html', title="Logget ud")
 
 
 @auth_bp.route('/change-password', methods=['GET', 'POST'])
@@ -83,7 +83,7 @@ def change_password():
         return redirect(next_page)
 
     return render_template(
-        'auth/change_password.html',
+        'change_password.html',
         form=form,
         title="Skift adgangskode"
     )
@@ -123,4 +123,4 @@ def activate(token):
         flash("Konto aktiveret! Du kan nu logge ind.", "success")
         return redirect(url_for('auth.login'))
 
-    return render_template('auth/activate.html', form=form, title="Aktivér konto")
+    return render_template('activate.html', form=form, title="Aktivér konto")

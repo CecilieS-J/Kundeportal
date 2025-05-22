@@ -8,8 +8,7 @@ from config import settings
 from datetime import datetime, timezone
 from flask_apscheduler import APScheduler
 from flask import Flask, redirect, url_for, request
-from scripts.cli import seed_stale_user, clean_users_command
-
+from scripts.cli import seed_stale_user, clean_users_command, backup_command, cleanup_command, seed_admin
 # Create Flask app instance
 app = Flask(__name__, template_folder="templates", instance_relative_config=True)
 
@@ -21,6 +20,9 @@ logging.basicConfig(level=logging.DEBUG)
 # Add custom CLI commands
 app.cli.add_command(seed_stale_user)
 app.cli.add_command(clean_users_command)
+app.cli.add_command(backup_command)
+app.cli.add_command(cleanup_command)
+app.cli.add_command(seed_admin)
 
 # Load app configuration from settings
 app.config.update({
@@ -131,7 +133,6 @@ def load_user(user_id):
 def unauthorized_callback():
     return redirect(url_for('auth.login', next=request.path))
 
-
 # Before every request: enforce login except for allowed endpoints and static files
 @app.before_request
 def require_login():
@@ -162,7 +163,6 @@ def require_login():
         if needs_change and request.endpoint not in allowed:
             return redirect(url_for('auth.change_password', next=request.path))
     
-
 # Make UserRole available in templates
 @app.context_processor
 def inject_user_role():
@@ -173,19 +173,17 @@ def inject_user_role():
 # Import and register blueprints in desired order
 from webapp.auth         import auth_bp
 from webapp.admin        import admin_bp
-from webapp.services.external_customer_service.routes import external_customer_service_bp
+from webapp.external_customer_service.routes import external_customer_service_bp
 from webapp.routes       import public_bp
-from webapp.aggregator.routes import aggregator_bp
-from webapp.services.brevo_service import brevo_service_bp
-from webapp.services.sfcc_service import sfcc_service_bp
-from webapp.services.omneo_service import omneo_service_bp
+from webapp.brevo_service import brevo_service_bp
+from webapp.sfcc_service import sfcc_service_bp
+from webapp.omneo_service import omneo_service_bp
 
 app.register_blueprint(omneo_service_bp)
 app.register_blueprint(sfcc_service_bp)
 app.register_blueprint(brevo_service_bp)
-app.register_blueprint(aggregator_bp)
-app.register_blueprint(auth_bp)           # login/logout
-app.register_blueprint(admin_bp)          # /admin/*
-app.register_blueprint(external_customer_service_bp)   # /external_customer/*
+app.register_blueprint(auth_bp)           
+app.register_blueprint(admin_bp)          
+app.register_blueprint(external_customer_service_bp)   
 app.register_blueprint(public_bp)         
 

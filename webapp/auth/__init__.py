@@ -6,7 +6,7 @@ auth_bp = Blueprint(
     'auth',
     __name__,
     url_prefix='/auth',
-    template_folder='templates/auth'
+    template_folder='templates'
 )
 
 # Import routes using a non-relative path – after auth_bp is defined

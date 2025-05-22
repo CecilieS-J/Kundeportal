@@ -1,0 +1,27 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+  <h2>Slå op i Brevo (e-mail eller SIB ID)</h2>
+
+  <form method="get" action="{{ url_for('brevo_service.lookup_contact') }}" class="mb-4">
+    
+      <div class="input-group">
+          <input type="text" class="form-control" name="query" placeholder="Indtast e-mail eller SIB ID" required>
+          <button type="submit" class="btn btn-primary">Søg</button>
+      </div>
+  </form>
+
+  {% if result %}
+    <table class="table table-striped">
+        <tr><th>Felt</th><th>Værdi</th></tr>
+        <tr><td>Email</td><td>{{ result.email or '–' }}</td></tr>
+        <tr><td>First Name</td><td>{{ result.first_name or '–' }}</td></tr>
+        <tr><td>Last Name</td><td>{{ result.last_name or '–' }}</td></tr>
+        <tr><td>SIB ID</td><td>{{ result.sib_id or '–' }}</td></tr>
+        <tr><td>Subscriptions</td><td>{{ result.subscriptions | join(', ') }}</td></tr>
+        <tr><td>Subscription Status</td><td>{{ result.subscription_status or '–' }}</td></tr>
+    </table>
+  {% elif request.args.get('query') %}
+    <div class="alert alert-warning">Ingen data fundet for: {{ request.args.get('query') }}</div>
+  {% endif %}
+{% endblock %}

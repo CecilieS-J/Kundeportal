@@ -7,7 +7,7 @@ admin_bp = Blueprint(
     'admin',                # giver endpoints som admin.list_users, admin.create_user…
     __name__,
     url_prefix='/admin',    # alle ruter bliver /admin/…
-    template_folder='templates/admin'
+    template_folder='templates'
 )
 
 # 2) Importér dine routes *efter* blueprintet er defineret

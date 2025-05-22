@@ -2,6 +2,9 @@
 import click
 from flask.cli import with_appcontext
 from datetime import datetime, timedelta, timezone
+from scripts.backup_script import run_backup
+from scripts.cleanup_backups import run_cleanup
+
 
 @click.command('seed-stale-user')
 @with_appcontext
@@ -34,7 +37,6 @@ def clean_users_command():
     click.echo("✅ delete_stale_users kørt")
 
 
-
 @click.command("seed-admin")
 @with_appcontext
 def seed_admin():
@@ -58,3 +60,16 @@ def seed_admin():
     db.session.add(admin)
     db.session.commit()
     click.echo("✅ Admin-bruger oprettet: admin / hemmeligtpw")
+
+   
+@click.command("backup")
+@with_appcontext
+def backup_command():
+    """Kør backup-scriptet."""
+    run_backup()
+
+@click.command("cleanup")
+@with_appcontext
+def cleanup_command():
+    """Sletter gamle backup-filer, hvis der er flere end 10."""
+    run_cleanup()

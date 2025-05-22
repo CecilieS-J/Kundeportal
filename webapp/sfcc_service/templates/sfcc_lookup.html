@@ -1,0 +1,38 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+  <h2>SFCC Customer Lookup</h2>
+
+  <form method="get" action="" class="mb-4">
+    <div class="form-group mb-3">
+      <label for="query" class="form-label">Customer Number</label>
+      <input
+        type="text"
+        id="query"
+        name="query"
+        class="form-control"
+        placeholder="Enter customer number"
+        value="{{ request.args.get('query', '') }}"
+        required
+      >
+    </div>
+
+    <button type="submit" class="btn btn-primary">Søg</button>
+  </form>
+
+  {% if result %}
+    <h3>Customer Info</h3>
+    <table class="table table-striped table-bordered">
+      <tbody>
+        {% for key, value in result.items() %}
+          <tr>
+            <th>{{ key|capitalize }}</th>
+            <td>{{ value }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% elif request.args.get('query') %}
+    <div class="alert alert-warning">No customer found for: {{ request.args.get('query') }}</div>
+  {% endif %}
+{% endblock %}
