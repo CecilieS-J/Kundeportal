@@ -1,20 +1,17 @@
 from webapp.brevo_service.client import get_brevo_contact
 
 class BrevoService:
-    def fetch_contact(self, identifier):
-        """
-        Hent en Brevo-kontakt ved hjælp af e-mail eller SIB ID.
-        """
-        data = get_brevo_contact(identifier)
-
-        if not data:
+    def fetch_contact(self, identifier: str) -> dict:
+        raw = get_brevo_contact(identifier)
+        if not raw or "email" not in raw:
             return {}
-
         return {
-            "email": data.get("email", ""),
-            "first_name": data.get("attributes", {}).get("FIRSTNAME", ""),
-            "last_name": data.get("attributes", {}).get("LASTNAME", ""),
-            "sib_id": data.get("id", ""),
-            "subscriptions": data.get("listIds", []),
-            "subscription_status": "subscribed" if not data.get("emailBlacklisted", False) else "unsubscribed"
+            "email":               raw.get("email", ""),
+            "first_name":          raw.get("attributes", {}).get("FIRSTNAME", ""),
+            "last_name":           raw.get("attributes", {}).get("LASTNAME", ""),
+            "sib_id":              raw.get("id", ""),
+            "subscriptions":       raw.get("listIds", []),
+            "subscription_status": "subscribed" 
+                                   if not raw.get("emailBlacklisted", False)
+                                   else "unsubscribed",
         }

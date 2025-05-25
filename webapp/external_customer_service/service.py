@@ -1,5 +1,6 @@
 from sqlalchemy import text
 from webapp.external_customer_service.client import ExternalSession
+import requests
 
 class CustomerExternalService:
     """
@@ -86,3 +87,13 @@ class CustomerExternalService:
             rows = session.execute(stmt, {"val": val}).mappings().all()
 
         return [dict(r) for r in rows]
+
+
+
+
+
+
+
+
+
+

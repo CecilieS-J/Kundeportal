@@ -190,13 +190,27 @@ def main():
         app.run(host='127.0.0.1', port=80, debug=True)
 
     finally:
-        # Only run backup when the actual reloader process exits
+        
         if os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
-            print("📦 Application shutting down. Creating backup...")
-            run_backup()
-            run_cleanup()
-            print("🗑️  Backup and cleaning done...")
-           
+            print("📦 Application shutting down. Starting backup and cleanup...")
+
+            # Run backup
+            try:
+              print("🔄 Kører backup...")
+              run_backup()
+              print("✅ Backup gennemført.")
+            except Exception as e:
+               print(f"❌ FEJL i run_backup(): {e}")
+
+            # Run cleanup
+            try:
+              print("🧹 Kører oprydning af gamle backups...")
+              run_cleanup()
+              print("✅ Cleanup gennemført.")
+            except Exception as e:
+               print(f"❌ FEJL i run_cleanup(): {e}")
+
+            print("🏁 Backup og oprydning afsluttet.")
 
 
 

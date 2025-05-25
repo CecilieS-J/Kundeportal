@@ -1,21 +1,25 @@
-
-from pathlib import Path
+import os
 
 def run_cleanup():
-    backup_folder = Path("backups")
-    max_files = 10
+    backup_dir = "backups"
+    max_backups = 10
 
-    all_files = sorted(
-        [f for f in backup_folder.iterdir() if f.is_file()],
-        key=lambda f: f.stat().st_mtime,
+    backups = sorted(
+        [f for f in os.listdir(backup_dir)
+         if f.endswith(".db")],
         reverse=True
     )
 
-    files_to_delete = all_files[max_files:]
+    if len(backups) > max_backups:
+        to_delete = backups[max_backups:]
+        for filename in to_delete:
 
-    for f in files_to_delete:
-        f.unlink()
-        print(f"Slettede: {f.name}")
+            # 🛑 Sikkerhedstjek: slet aldrig den aktive database
+            if filename == "customer_data.db":
+                continue  # spring over, må ikke slettes
 
-    if not files_to_delete:
+            full_path = os.path.join(backup_dir, filename)
+            os.remove(full_path)
+            print(f"Slettede backup: {filename}")
+    else:
         print("Ingen filer slettet – der er 10 eller færre backups.")

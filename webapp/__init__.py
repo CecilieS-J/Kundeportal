@@ -1,4 +1,3 @@
-
 from flask import Flask, redirect, url_for, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -178,7 +177,9 @@ from webapp.routes       import public_bp
 from webapp.brevo_service import brevo_service_bp
 from webapp.sfcc_service import sfcc_service_bp
 from webapp.omneo_service import omneo_service_bp
+from comparison.routes import comparison_bp
 
+app.register_blueprint(comparison_bp)
 app.register_blueprint(omneo_service_bp)
 app.register_blueprint(sfcc_service_bp)
 app.register_blueprint(brevo_service_bp)
