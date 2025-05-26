@@ -5,6 +5,7 @@ from ..brevo_service.service import BrevoService
 class CustomerAggregator:
     """
     Aggregates and normalizes customer data from External DB, SFCC, and Brevo.
+    Supports lookup by customer_no, email, goodie_id, or sib_id.
     """
     def __init__(self,
                  external_service: CustomerExternalService = None,
@@ -20,40 +21,54 @@ class CustomerAggregator:
                        goodie_id:   str = None,
                        sib_id:      str = None) -> dict:
         """
-        Fetches and normalizes data. Searches by customer_no first,
-        then uses returned email to fetch Brevo profile.
+        Fetch and normalize data in this order:
+        1) Use customer_no if provided.
+        2) Else use goodie_id.
+        3) Else use email.
+        4) Else use sib_id.
+        Fetch external first to obtain customer_no and email for other systems.
+        Then fetch SFCC by customer_no and Brevo by email.
         """
-        # 1) Fetch from External by customer_no (primary key)
-        raw_ext = {}
+        # --- External lookup ---
+        lookup_kwargs = {}
         if customer_no:
-            raw_ext = self.external_service.fetch_external_customer(
-                customer_no=customer_no
-            ) or {}
-        # 2) Determine email from External
-        ext_email = raw_ext.get('email')
-        # 3) Fetch SFCC if we have customer_no
+            lookup_kwargs['customer_no'] = customer_no
+        elif goodie_id:
+            lookup_kwargs['goodie_id'] = goodie_id
+        elif email:
+            lookup_kwargs['email'] = email
+        elif sib_id:
+            lookup_kwargs['sib_id'] = sib_id
+
+        raw_ext = self.external_service.fetch_external_customer(**lookup_kwargs) or {}
+        # Overwrite customer_no and email with external's data if available
+        customer_no = customer_no or raw_ext.get('customer_no')
+        email = email or raw_ext.get('email')
+
+        # --- SFCC lookup ---
         raw_sfcc = {}
         if customer_no:
             raw_sfcc = self.sfcc_service.fetch_customer_by_customer_no(customer_no) or {}
-        # 4) Fetch Brevo by email
-        raw_brevo = {}
-        if ext_email:
-            raw_brevo = self.brevo_service.fetch_contact(ext_email) or {}
 
-        # Define common fields
+        # --- Brevo lookup ---
+        raw_brevo = {}
+        if email:
+            raw_brevo = self.brevo_service.fetch_contact(email) or {}
+
+        # Standardized field set
         fields = [
             'first_name', 'last_name', 'goodiecard', 'email',
             'omneo_id', 'customer_no', 'sib_id',
             'phone_home', 'phone_mobile', 'birthday'
         ]
 
-        # Normalize External
+        # --- Normalize External ---
         external = {key: None for key in fields}
         if raw_ext:
             external.update({
                 'first_name':   raw_ext.get('first_name'),
                 'last_name':    raw_ext.get('last_name'),
-                'goodiecard':   str(raw_ext.get('customer_id')) if raw_ext.get('customer_id') is not None else None,
+                'goodiecard':   str(raw_ext.get('customer_id')) if raw_ext.get('customer_id') else None,
                 'email':        raw_ext.get('email'),
                 'omneo_id':     raw_ext.get('omneo_id'),
                 'customer_no':  raw_ext.get('customer_no'),
@@ -63,7 +78,7 @@ class CustomerAggregator:
                 'birthday':     raw_ext.get('birthday'),
             })
 
-        # Normalize SFCC
+        # --- Normalize SFCC ---
         sfcc = {key: None for key in fields}
         if raw_sfcc:
             sfcc.update({
@@ -79,7 +94,7 @@ class CustomerAggregator:
                 'birthday':     raw_sfcc.get('birthday'),
             })
 
-        # Normalize Brevo
+        # --- Normalize Brevo ---
         brevo = {key: None for key in fields}
         if raw_brevo:
             brevo.update({
@@ -95,10 +110,10 @@ class CustomerAggregator:
                 'birthday':     None,
             })
 
-        # Fetch events
+        # --- Event log ---
         events = self.external_service.fetch_event_log(
             customer_no=customer_no,
-            email=ext_email
+            email=email
         ) or []
 
         return {

@@ -11,8 +11,7 @@ class CustomerLookupForm(FlaskForm):
         choices=[
             ('email', 'E-mail'),
             ('customer_no', 'Customer No'),
-            ('goodie_id', 'Goodie ID'),
-            ('sib_id', 'SIB ID')
+            ('goodie_id', 'Goodie ID')
         ],
         validators=[DataRequired()]
     )

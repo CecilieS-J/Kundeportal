@@ -4,7 +4,8 @@
 
 {% block content %}
 <div class="container mt-4">
-  <h2>Resultater for {{ request.args.get(request.args.get('identifier_type') or 'query') }} ({{ request.args.get('identifier_type')|replace('_',' ')|title }})</h2>
+  {%- set search_val = external.get('goodiecard') or '-' -%}
+<h2>Resultater for Goodiecard {{ search_val }}</h2>
 
   <!-- Fundet i -->
   <h4>Fundet i</h4>
@@ -16,8 +17,11 @@
   </ul>
 
   <!-- Alle data -->
-  {% set sfcc_unsupported = ['sib_id', 'phone_mobile', 'omneo_id', 'birthday'] %}
-  {% set brevo_unsupported = ['omneo_id', 'birthday'] %}
+  {% set unsupported = {
+    'brevo': ['omneo_id', 'birthday'],
+    'sfcc': ['sib_id', 'phone_mobile', 'omneo_id', 'birthday'],
+    'external': []
+  } %}
   <h4>Alle data</h4>
   <div class="table-responsive">
     <table class="table table-sm table-striped">
@@ -32,29 +36,28 @@
       <tbody>
         {# Exclude data_pretty #}
         {%- set keys = external.keys()|select('ne','data_pretty')|list -%}
-        {%- for key in sfcc.keys() if key not in keys -%}
-          {%- set _ = keys.append(key) -%}
-        {%- endfor -%}
-        {%- for key in brevo.keys() if key not in keys -%}
-          {%- set _ = keys.append(key) -%}
+        {%- for system in ['brevo','sfcc'] -%}
+          {%- for key in (system == 'brevo' and brevo or sfcc).keys() if key not in keys -%}
+            {%- set _ = keys.append(key) -%}
+          {%- endfor -%}
         {%- endfor -%}
 
         {% for key in keys %}
         <tr>
           <td>{{ key|replace('_',' ')|title }}</td>
           <td>
-            {% if brevo.get(key) is none and key in brevo_unsupported %}
+            {% if key in unsupported['brevo'] %}
               <span class="text-muted">Ikke tilgængelig</span>
             {% else %}
-              {{ brevo.get(key, '-') }}
+              {{ brevo.get(key, '–') }}
             {% endif %}
           </td>
-          <td>{{ external.get(key, '-') }}</td>
+          <td>{{ external.get(key, '–') }}</td>
           <td>
-            {% if sfcc.get(key) is none and key in sfcc_unsupported %}
+            {% if key in unsupported['sfcc'] %}
               <span class="text-muted">Ikke tilgængelig</span>
             {% else %}
-              {{ sfcc.get(key, '-') }}
+              {{ sfcc.get(key, '–') }}
             {% endif %}
           </td>
         </tr>
@@ -65,29 +68,52 @@
 
   <!-- Forskelle -->
   <h4>Forskelle</h4>
-  {%- set diffs = [] -%}
+  {% set diffs = [] %}
   {% for key in keys %}
-    {%- set e = external.get(key)|string -%}
-    {%- set b_val = brevo.get(key) -%}
-    {%- set b = b_val is none and key in brevo_unsupported and 'Ikke tilgængelig' or (b_val|string) -%}
-    {%- set s_val = sfcc.get(key) -%}
-    {%- set s = s_val is none and key in sfcc_unsupported and 'Ikke tilgængelig' or (s_val|string) -%}
-    {# Kun hvis der er nogen reel forskel blandt de tilgængelige #}
-    {% if (e != b or e != s or b != s) and not (e == '-' and b == '-' and s == '-') %}
-      {%- set _ = diffs.append({'field': key, 'brevo': b, 'external': e, 'sfcc': s}) -%}
+    {# Saml værdier fra understøttede systemer #}
+    {% set vals = [] %}
+    {% if key not in unsupported['brevo'] %}
+      {% set val = brevo.get(key) %}
+      {% set _ = vals.append(val) %}
+    {% endif %}
+    {% if key not in unsupported['external'] %}
+      {% set val = external.get(key) %}
+      {% set _ = vals.append(val) %}
+    {% endif %}
+    {% if key not in unsupported['sfcc'] %}
+      {% set val = sfcc.get(key) %}
+      {% set _ = vals.append(val) %}
+    {% endif %}
+    {# Find unikke værdier inklusive None og '' #}
+    {% set uniq = [] %}
+    {% for v in vals %}
+      {% set vstr = v is none and '' or (v|string) %}
+      {% if vstr not in uniq %}
+        {% set _ = uniq.append(vstr) %}
+      {% endif %}
+    {% endfor %}
+    {# Diff hvis mere end ét unikt element, hvor unikt element != '' #}
+    {% if uniq|length > 1 %}
+      {% set diffs = diffs + [{
+        'field': key,
+        'brevo': key in unsupported['brevo'] and '–' or (brevo.get(key) is none and '' or (brevo.get(key)|string)),
+        'external': external.get(key) is none and '' or (external.get(key)|string),
+        'sfcc': key in unsupported['sfcc'] and '–' or (sfcc.get(key) is none and '' or (sfcc.get(key)|string))
+      }] %}
     {% endif %}
   {% endfor %}
 
   {% if diffs %}
-  <ul>
+    <ul>
     {% for d in diffs %}
-    <li><strong>{{ d.field|replace('_',' ')|title }}</strong>:
-        Brevo="{{ d.brevo }}", External="{{ d.external }}", SFCC="{{ d.sfcc }}"
-    </li>
+      <li><strong>{{ d.field|replace('_',' ')|title }}</strong>: Brevo="{{ d.brevo }}", External="{{ d.external }}", SFCC="{{ d.sfcc }}"</li>
     {% endfor %}
-  </ul>
+    </ul>
   {% else %}
-  <p>Ingen forskelle fundet.</p>
+    <p>Ingen forskelle fundet.</p>
   {% endif %}
 </div>
+<a href="{{ url_for('aggregator.customer_form') }}" class="btn btn-secondary">
+    Tilbage
+  </a>
 {% endblock %}
