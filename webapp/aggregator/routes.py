@@ -15,16 +15,12 @@ def customer_form():
 
 @aggregator_bp.route('/details', methods=['GET'])
 def customer_details():
-    # Hent søgeparametre fra URL’en
-    email       = request.args.get('email')
+    # Hent email, customer_no, goodie_id, sib_id fra query params
+    email = request.args.get('email')
     customer_no = request.args.get('customer_no')
-    goodie_id   = request.args.get('goodie_id')
-    sib_id      = request.args.get('sib_id')
+    goodie_id = request.args.get('goodie_id')
+    sib_id = request.args.get('sib_id')
 
-    if not any([email, customer_no, goodie_id, sib_id]):
-        abort(400, description="Angiv mindst én af: email, customer_no, goodie_id eller sib_id")
-
-    # Kald din aggregator-service her
     aggregator = CustomerAggregator()
     result = aggregator.fetch_customer(
         email=email,
@@ -33,19 +29,17 @@ def customer_details():
         sib_id=sib_id
     )
 
-    # Hvis ingen data, vis med null-værdier og 404-status
-    if not result:
-        return render_template(
-            'customer_details.html',
-            external=None,
-            sfcc=None,
-            events=None
-        ), 404
+    # Pak værdier ud
+    brevo     = result.get('brevo', {})
+    external  = result.get('external', {})
+    sfcc      = result.get('sfcc', {})
+    events    = result.get('events', [])
 
-    # Ellers render med data
+    # Render med brevo også
     return render_template(
         'customer_details.html',
-        external=result['external'],
-        sfcc=result['sfcc'],
-        events=result['events']
-    )
+        brevo=brevo,
+        external=external,
+        sfcc=sfcc,
+        events=events
+    ), (404 if not result else 200)

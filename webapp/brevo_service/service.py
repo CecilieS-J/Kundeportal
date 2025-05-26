@@ -12,7 +12,6 @@ class BrevoService:
             "last_name":           attrs.get("LASTNAME", ""),
             "sib_id":              raw.get("id", ""),
             "goodiecard":          attrs.get("GOODIE_ID", ""),
-            "omneo_id":            None,
             "customer_no": attrs.get("CUSTOMER_NO", ""),
             "sib_id":              raw.get("id", ""),
             "phone_home":          attrs.get("PHONE", ""),

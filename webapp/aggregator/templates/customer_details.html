@@ -9,21 +9,22 @@
   <!-- Fundet i -->
   <h4>Fundet i</h4>
   <ul>
+    {% if brevo %}<li>Brevo</li>{% endif %}
     {% if external %}<li>External</li>{% endif %}
     {% if sfcc %}<li>SFCC</li>{% endif %}
-    {% if not external and not sfcc %}<li>Ingen systemer</li>{% endif %}
+    {% if not brevo and not external and not sfcc %}<li>Ingen systemer</li>{% endif %}
   </ul>
 
   <!-- Alle data -->
-  {% set sfcc_unsupported = ['sib_id', 'phone_mobile'] %}
-
-  <!-- Alle data -->
+  {% set sfcc_unsupported = ['sib_id', 'phone_mobile', 'omneo_id', 'birthday'] %}
+  {% set brevo_unsupported = ['omneo_id', 'birthday'] %}
   <h4>Alle data</h4>
   <div class="table-responsive">
     <table class="table table-sm table-striped">
       <thead>
         <tr>
           <th>Felt</th>
+          <th>Brevo</th>
           <th>External</th>
           <th>SFCC</th>
         </tr>
@@ -34,10 +35,20 @@
         {%- for key in sfcc.keys() if key not in keys -%}
           {%- set _ = keys.append(key) -%}
         {%- endfor -%}
+        {%- for key in brevo.keys() if key not in keys -%}
+          {%- set _ = keys.append(key) -%}
+        {%- endfor -%}
 
         {% for key in keys %}
         <tr>
           <td>{{ key|replace('_',' ')|title }}</td>
+          <td>
+            {% if brevo.get(key) is none and key in brevo_unsupported %}
+              <span class="text-muted">Ikke tilgængelig</span>
+            {% else %}
+              {{ brevo.get(key, '-') }}
+            {% endif %}
+          </td>
           <td>{{ external.get(key, '-') }}</td>
           <td>
             {% if sfcc.get(key) is none and key in sfcc_unsupported %}
@@ -52,25 +63,27 @@
     </table>
   </div>
 
-    <!-- Forskelle -->
+  <!-- Forskelle -->
   <h4>Forskelle</h4>
-  {# Kun vis forskelle for felter, der understøttes og hvor både eksisterende og SFCC har data eller SFCC mangler data aktivt #}
   {%- set diffs = [] -%}
-  {%- for key in keys -%}
-    {# spring uberettigede felter over #}
-    {%- if key not in sfcc_unsupported -%}
-      {%- set ext = external.get(key) -%}
-      {%- set sf  = sfcc.get(key) -%}
-      {# kun hvis én af dem ikke er None og de ikke er ens #}
-      {%- if (ext is not none or sf is not none) and ext|string != (sf|string) -%}
-        {%- set _ = diffs.append({'field': key, 'external': ext|string, 'sfcc': sf|string}) -%}
-      {%- endif -%}
-    {%- endif -%}
-  {%- endfor -%}
+  {% for key in keys %}
+    {%- set e = external.get(key)|string -%}
+    {%- set b_val = brevo.get(key) -%}
+    {%- set b = b_val is none and key in brevo_unsupported and 'Ikke tilgængelig' or (b_val|string) -%}
+    {%- set s_val = sfcc.get(key) -%}
+    {%- set s = s_val is none and key in sfcc_unsupported and 'Ikke tilgængelig' or (s_val|string) -%}
+    {# Kun hvis der er nogen reel forskel blandt de tilgængelige #}
+    {% if (e != b or e != s or b != s) and not (e == '-' and b == '-' and s == '-') %}
+      {%- set _ = diffs.append({'field': key, 'brevo': b, 'external': e, 'sfcc': s}) -%}
+    {% endif %}
+  {% endfor %}
+
   {% if diffs %}
   <ul>
     {% for d in diffs %}
-    <li><strong>{{ d.field|replace('_',' ')|title }}</strong>: External="{{ d.external }}", SFCC="{{ d.sfcc }}"</li>
+    <li><strong>{{ d.field|replace('_',' ')|title }}</strong>:
+        Brevo="{{ d.brevo }}", External="{{ d.external }}", SFCC="{{ d.sfcc }}"
+    </li>
     {% endfor %}
   </ul>
   {% else %}
