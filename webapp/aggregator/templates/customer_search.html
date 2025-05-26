@@ -1,0 +1,20 @@
+{% extends "layout.html" %}
+
+{% block title %}Search Customer{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <h1 class="mb-4">Søg Kunde</h1>
+  <form method="post" action="{{ url_for('aggregator.customer_form') }}">
+    {{ form.hidden_tag() }}
+    <div class="mb-3">
+      {{ form.search_type.label(class="form-label") }}
+      {{ form.search_type(class="form-select") }}
+    </div>
+    <div class="mb-3">
+      {{ form.query.label(class="form-label") }}
+      {{ form.query(class="form-control") }}
+    </div>
+    <button type="submit" class="btn btn-primary">{{ form.submit.label.text }}</button>
+  </form>
+{% endblock %}

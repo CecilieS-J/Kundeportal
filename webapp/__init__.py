@@ -177,9 +177,10 @@ from webapp.routes       import public_bp
 from webapp.brevo_service import brevo_service_bp
 from webapp.sfcc_service import sfcc_service_bp
 from webapp.omneo_service import omneo_service_bp
-from comparison.routes import comparison_bp
+from webapp.aggregator.routes import aggregator_bp
 
-app.register_blueprint(comparison_bp)
+
+app.register_blueprint(aggregator_bp)
 app.register_blueprint(omneo_service_bp)
 app.register_blueprint(sfcc_service_bp)
 app.register_blueprint(brevo_service_bp)

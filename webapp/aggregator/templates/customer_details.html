@@ -1,0 +1,80 @@
+{% extends 'layout.html' %}
+
+{% block title %}Resultater{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <h2>Resultater for {{ request.args.get(request.args.get('identifier_type') or 'query') }} ({{ request.args.get('identifier_type')|replace('_',' ')|title }})</h2>
+
+  <!-- Fundet i -->
+  <h4>Fundet i</h4>
+  <ul>
+    {% if external %}<li>External</li>{% endif %}
+    {% if sfcc %}<li>SFCC</li>{% endif %}
+    {% if not external and not sfcc %}<li>Ingen systemer</li>{% endif %}
+  </ul>
+
+  <!-- Alle data -->
+  {% set sfcc_unsupported = ['sib_id', 'phone_mobile'] %}
+
+  <!-- Alle data -->
+  <h4>Alle data</h4>
+  <div class="table-responsive">
+    <table class="table table-sm table-striped">
+      <thead>
+        <tr>
+          <th>Felt</th>
+          <th>External</th>
+          <th>SFCC</th>
+        </tr>
+      </thead>
+      <tbody>
+        {# Exclude data_pretty #}
+        {%- set keys = external.keys()|select('ne','data_pretty')|list -%}
+        {%- for key in sfcc.keys() if key not in keys -%}
+          {%- set _ = keys.append(key) -%}
+        {%- endfor -%}
+
+        {% for key in keys %}
+        <tr>
+          <td>{{ key|replace('_',' ')|title }}</td>
+          <td>{{ external.get(key, '-') }}</td>
+          <td>
+            {% if sfcc.get(key) is none and key in sfcc_unsupported %}
+              <span class="text-muted">Ikke tilgængelig</span>
+            {% else %}
+              {{ sfcc.get(key, '-') }}
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+    <!-- Forskelle -->
+  <h4>Forskelle</h4>
+  {# Kun vis forskelle for felter, der understøttes og hvor både eksisterende og SFCC har data eller SFCC mangler data aktivt #}
+  {%- set diffs = [] -%}
+  {%- for key in keys -%}
+    {# spring uberettigede felter over #}
+    {%- if key not in sfcc_unsupported -%}
+      {%- set ext = external.get(key) -%}
+      {%- set sf  = sfcc.get(key) -%}
+      {# kun hvis én af dem ikke er None og de ikke er ens #}
+      {%- if (ext is not none or sf is not none) and ext|string != (sf|string) -%}
+        {%- set _ = diffs.append({'field': key, 'external': ext|string, 'sfcc': sf|string}) -%}
+      {%- endif -%}
+    {%- endif -%}
+  {%- endfor -%}
+  {% if diffs %}
+  <ul>
+    {% for d in diffs %}
+    <li><strong>{{ d.field|replace('_',' ')|title }}</strong>: External="{{ d.external }}", SFCC="{{ d.sfcc }}"</li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p>Ingen forskelle fundet.</p>
+  {% endif %}
+</div>
+{% endblock %}

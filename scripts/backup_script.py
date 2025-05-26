@@ -3,10 +3,11 @@ import shutil
 from datetime import datetime
 
 def run_backup():
-    db_path = os.path.join("instance", "customer_data.db")  # ✅ korrekt sti
+    # Define the path to the database and the backup directory
+    db_path = os.path.join("instance", "customer_data.db")  
     backup_dir = "backups"
 
-    # Print hvor vi kigger – til fejlsøgning
+  
     print("🔍 Current dir:", os.getcwd())
     print("🔍 Leder efter DB på:", os.path.abspath(db_path))
 

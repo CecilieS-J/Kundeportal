@@ -8,19 +8,20 @@ class OmneoClient:
         self.api_token = settings.OMNEO_API_TOKEN
 
     def _get(self, url):
-        headers = {
-            "Authorization": f"Bearer {self.api_token}",
-            "Content-Type": "application/json"
-        }
-        print("➡️ Request URL:", url)
-        response = requests.get(url, headers=headers)
-        print("📦 Status:", response.status_code)
-        print("📦 Body:", response.text)
-        try:
-            return response.json()
-        except Exception as e:
-            print("❌ JSON-fejl:", e)
-            return {}
+      headers = {
+          "Authorization": f"Bearer {self.api_token}",
+          "Content-Type": "application/json"
+      }
+      print("➡️ Request URL:", url)
+      response = requests.get(url, headers=headers)
+      print("📦 Status:", response.status_code)
+      print("📦 Body:", response.text)  # Eksisterende logning
+      print("📦 Parsed JSON:", response.json() if response.text else "No JSON data")  # Ny linje
+      try:
+          return response.json()
+      except Exception as e:
+          print("❌ JSON-fejl:", e)
+          return {}
 
     def _post(self, url, payload):
         headers = {
@@ -62,3 +63,18 @@ class OmneoClient:
     def get_profile_by_id(self, profile_id: str):
         url = f"{self.base_url}/profiles/{profile_id}"
         return self._get(url)
+    
+
+
+
+
+def search_profiles_by_identifier(self, identifier_type: str, identifier: str):
+    
+    if identifier_type == "card_pos":
+        # Prøv en alternativ endpoint eller filter for card_pos
+        url = f"{self.base_url}/profiles?filter[card_pos]={quote(identifier)}"
+    elif identifier_type == "email":
+        url = f"{self.base_url}/profiles?filter[email]={quote(identifier)}"
+    else:
+        return []
+    return self._get(url).get("data", [])

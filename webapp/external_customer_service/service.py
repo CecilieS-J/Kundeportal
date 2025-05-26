@@ -1,6 +1,6 @@
 from sqlalchemy import text
 from webapp.external_customer_service.client import ExternalSession
-import requests
+
 
 class CustomerExternalService:
     """
@@ -24,7 +24,8 @@ class CustomerExternalService:
               data->>'phone_home'      AS phone_home,
               data->>'phone_mobile'    AS phone_mobile,
               data->>'phone_business'  AS phone_business,
-              data->>'clientela_id'    AS clientela_id
+              data->>'clientela_id'    AS clientela_id,
+              data->>'birthday'      AS birthday
             FROM customer
             WHERE 1=1
         """
