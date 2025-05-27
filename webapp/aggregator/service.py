@@ -1,19 +1,22 @@
 from ..external_customer_service.service import CustomerExternalService
 from ..sfcc_service.service import SFCCService
 from ..brevo_service.service import BrevoService
+from ..omneo_service.service import OmneoService
 
 class CustomerAggregator:
     """
-    Aggregates and normalizes customer data from External DB, SFCC, and Brevo.
+    Aggregates and normalizes customer data from External DB, SFCC, Brevo, and Omneo.
     Supports lookup by customer_no, email, goodie_id, or sib_id.
     """
     def __init__(self,
                  external_service: CustomerExternalService = None,
                  sfcc_service:     SFCCService           = None,
-                 brevo_service:    BrevoService          = None):
+                 brevo_service:    BrevoService          = None,
+                 omneo_service:    OmneoService          = None):
         self.external_service = external_service or CustomerExternalService()
         self.sfcc_service     = sfcc_service     or SFCCService()
         self.brevo_service    = brevo_service    or BrevoService()
+        self.omneo_service    = omneo_service    or OmneoService()
 
     def fetch_customer(self,
                        email:       str = None,
@@ -27,7 +30,7 @@ class CustomerAggregator:
         3) Else use email.
         4) Else use sib_id.
         Fetch external first to obtain customer_no and email for other systems.
-        Then fetch SFCC by customer_no and Brevo by email.
+        Then fetch SFCC by customer_no, Brevo by email, and Omneo by email or goodiecard.
         """
         # --- External lookup ---
         lookup_kwargs = {}
@@ -41,9 +44,8 @@ class CustomerAggregator:
             lookup_kwargs['sib_id'] = sib_id
 
         raw_ext = self.external_service.fetch_external_customer(**lookup_kwargs) or {}
-        # Overwrite customer_no and email with external's data if available
         customer_no = customer_no or raw_ext.get('customer_no')
-        email = email or raw_ext.get('email')
+        email       = email       or raw_ext.get('email')
 
         # --- SFCC lookup ---
         raw_sfcc = {}
@@ -55,15 +57,24 @@ class CustomerAggregator:
         if email:
             raw_brevo = self.brevo_service.fetch_contact(email) or {}
 
-        # Standardized field set
+        # --- Omneo lookup ---
+        raw_omneo = {}
+        if email:
+            omneo_profiles = self.omneo_service.fetch_by_email(email)
+            raw_omneo = omneo_profiles[0] if omneo_profiles else {}
+        elif goodie_id:
+            omneo_profiles = self.omneo_service.fetch_by_card_pos(goodie_id)
+            raw_omneo = omneo_profiles[0] if omneo_profiles else {}
+
+        # --- Standardized fields ---
         fields = [
             'first_name', 'last_name', 'goodiecard', 'email',
             'omneo_id', 'customer_no', 'sib_id',
-            'phone_home', 'phone_mobile', 'birthday'
+            'phone_home', 'phone_mobile'
         ]
 
         # --- Normalize External ---
-        external = {key: None for key in fields}
+        external = {k: None for k in fields}
         if raw_ext:
             external.update({
                 'first_name':   raw_ext.get('first_name'),
@@ -75,11 +86,11 @@ class CustomerAggregator:
                 'sib_id':       raw_ext.get('sib_id'),
                 'phone_home':   raw_ext.get('phone_home'),
                 'phone_mobile': raw_ext.get('phone_mobile'),
-                'birthday':     raw_ext.get('birthday'),
+                
             })
 
         # --- Normalize SFCC ---
-        sfcc = {key: None for key in fields}
+        sfcc = {k: None for k in fields}
         if raw_sfcc:
             sfcc.update({
                 'first_name':   raw_sfcc.get('first_name'),
@@ -91,11 +102,11 @@ class CustomerAggregator:
                 'sib_id':       None,
                 'phone_home':   raw_sfcc.get('phone_home'),
                 'phone_mobile': None,
-                'birthday':     raw_sfcc.get('birthday'),
+                
             })
 
         # --- Normalize Brevo ---
-        brevo = {key: None for key in fields}
+        brevo = {k: None for k in fields}
         if raw_brevo:
             brevo.update({
                 'first_name':   raw_brevo.get('first_name'),
@@ -107,7 +118,27 @@ class CustomerAggregator:
                 'sib_id':       raw_brevo.get('sib_id'),
                 'phone_home':   raw_brevo.get('phone_home'),
                 'phone_mobile': raw_brevo.get('phone_mobile'),
-                'birthday':     None,
+                
+            })
+
+        # --- Normalize Omneo ---
+        omneo = {k: None for k in fields}
+        if raw_omneo:
+            identities = { 
+                'card_pos':     raw_omneo.get('card_pos'),
+                'sfcc_customer': raw_omneo.get('sfcc_customer')
+            }
+            omneo.update({
+                'first_name':    raw_omneo.get('first_name'),
+                'last_name':     raw_omneo.get('last_name'),
+                'goodiecard':    identities.get('card_pos'),
+                'email':         raw_omneo.get('email'),
+                'omneo_id':      raw_omneo.get('id'),
+                'customer_no':   identities.get('sfcc_customer'),
+                'sib_id':        None,
+                'phone_home':    None,
+                'phone_mobile':  raw_omneo.get('phone'),
+                
             })
 
         # --- Event log ---
@@ -120,5 +151,6 @@ class CustomerAggregator:
             'external': external,
             'sfcc':     sfcc,
             'brevo':    brevo,
+            'omneo':    omneo,
             'events':   events
         }

@@ -1,20 +1,47 @@
 {% extends "layout.html" %}
 
-{% block title %}Search Customer{% endblock %}
+{% block title %}Søg Kunde{% endblock %}
 
 {% block content %}
 <div class="container mt-4">
   <h1 class="mb-4">Søg Kunde</h1>
-  <form method="post" action="{{ url_for('aggregator.customer_form') }}">
+  <form method="post"
+        action="{{ url_for('aggregator.customer_form') }}"
+        enctype="multipart/form-data">
     {{ form.hidden_tag() }}
+
     <div class="mb-3">
-      {{ form.search_type.label(class="form-label") }}
-      {{ form.search_type(class="form-select") }}
+      {{ form.search_type.label(class="form-label") }}<br>
+      {% for sub in form.search_type %}
+        <div class="form-check form-check-inline">
+          {{ sub(class="form-check-input") }}
+          <label class="form-check-label" for="{{ sub.id }}">{{ sub.label.text }}</label>
+        </div>
+      {% endfor %}
+      {% if form.search_type.errors %}
+        <div class="text-danger">{{ form.search_type.errors[0] }}</div>
+      {% endif %}
     </div>
+
     <div class="mb-3">
       {{ form.query.label(class="form-label") }}
       {{ form.query(class="form-control") }}
+      {% if form.query.errors %}
+        <div class="text-danger">{{ form.query.errors[0] }}</div>
+      {% endif %}
+      <div class="form-text">Eller upload en CSV eller Excel-fil med én kolonne</div>
     </div>
-    <button type="submit" class="btn btn-primary">{{ form.submit.label.text }}</button>
+
+    <div class="mb-3">
+      {{ form.file.label(class="form-label") }}
+      {{ form.file(class="form-control") }}
+      {% if form.file.errors %}
+        <div class="text-danger">{{ form.file.errors[0] }}</div>
+      {% endif %}
+      <div class="form-text">Vælg .csv eller .xlsx</div>
+    </div>
+
+    {{ form.submit(class="btn btn-primary") }}
   </form>
+</div>
 {% endblock %}

@@ -1,0 +1,130 @@
+{% extends 'layout.html' %}
+
+{% block title %}Resultater{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  {%- set search_val = external.get('goodiecard') or '-' -%}
+  <h2>Resultater for Goodiecard {{ search_val }}</h2>
+
+  <!-- Fundet i -->
+  <h4>Fundet i</h4>
+  <ul>
+    {% if brevo %}<li>Brevo</li>{% endif %}
+    {% if external %}<li>External</li>{% endif %}
+    {% if omneo %}<li>Omneo</li>{% endif %}
+    {% if sfcc %}<li>SFCC</li>{% endif %}
+    {% if not brevo and not external and not omneo and not sfcc %}<li>Ingen systemer</li>{% endif %}
+  </ul>
+
+  <!-- Alle data -->
+  {% set unsupported = {
+    'brevo':   ['omneo_id'],
+    'external': [],
+    'omneo':   ['sib_id', 'phone_home'],
+    'sfcc':    ['sib_id', 'phone_mobile']
+  } %}
+  <h4>Alle data</h4>
+  <div class="table-responsive">
+    <table class="table table-sm table-striped">
+      <thead>
+        <tr>
+          <th>Felt</th>
+          <th>Brevo</th>
+          <th>External</th>
+          <th>Omneo</th>
+          <th>SFCC</th>
+        </tr>
+      </thead>
+      <tbody>
+        {# Exclude data_pretty and remove birthday #}
+        {%- set keys = external.keys()|select('ne','data_pretty')|reject('equalto','birthday')|list -%}
+        {%- for sys in ['brevo','omneo','sfcc'] -%}
+          {%- for key in (sys=='brevo' and brevo or (sys=='omneo' and omneo or sfcc)).keys() if key not in keys and key != 'birthday' -%}
+            {%- set _ = keys.append(key) -%}
+          {%- endfor -%}
+        {%- endfor -%}
+
+        {% for key in keys %}
+        <tr>
+          <td>{{ key|replace('_',' ')|title }}</td>
+          <!-- Brevo -->
+          <td>
+            {% if key in unsupported['brevo'] %}
+              <span class="text-muted">Ikke tilgængelig</span>
+            {% else %}
+              {{ brevo.get(key, '–') }}
+            {% endif %}
+          </td>
+          <!-- External -->
+          <td>{{ external.get(key, '–') }}</td>
+          <!-- Omneo -->
+          <td>
+            {% if key in unsupported['omneo'] %}
+              <span class="text-muted">Ikke tilgængelig</span>
+            {% else %}
+              {{ omneo.get(key, '–') }}
+            {% endif %}
+          </td>
+          <!-- SFCC -->
+          <td>
+            {% if key in unsupported['sfcc'] %}
+              <span class="text-muted">Ikke tilgængelig</span>
+            {% else %}
+              {{ sfcc.get(key, '–') }}
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Forskelle -->
+  <h4>Forskelle</h4>
+  {% set diffs = [] %}
+  {% for key in keys %}
+    {% set vals = [] %}
+    {% if key not in unsupported['brevo'] %}{% set _ = vals.append(brevo.get(key)) %}{% endif %}
+    {% if key not in unsupported['external'] %}{% set _ = vals.append(external.get(key)) %}{% endif %}
+    {% if key not in unsupported['omneo'] %}{% set _ = vals.append(omneo.get(key)) %}{% endif %}
+    {% if key not in unsupported['sfcc'] %}{% set _ = vals.append(sfcc.get(key)) %}{% endif %}
+
+    {% set uniq = [] %}
+    {% for v in vals %}
+      {% set vs = v is none and '' or (v|string) %}
+      {% if vs and vs not in uniq %}{% set _ = uniq.append(vs) %}{% endif %}
+    {% endfor %}
+
+    {% if uniq|length > 1 %}
+      {% set diffs = diffs + [{
+        'field': key,
+        'brevo': brevo.get(key) is none and '' or (brevo.get(key)|string),
+        'external': external.get(key) is none and '' or (external.get(key)|string),
+        'omneo': omneo.get(key) is none and '' or (omneo.get(key)|string),
+        'sfcc': sfcc.get(key) is none and '' or (sfcc.get(key)|string)
+      }] %}
+    {% endif %}
+  {% endfor %}
+
+  {% if diffs %}
+    <ul>
+      {% for d in diffs %}
+      <li><strong>{{ d.field|replace('_',' ')|title }}</strong>: Brevo="{{ d.brevo }}", External="{{ d.external }}", Omneo="{{ d.omneo }}", SFCC="{{ d.sfcc }}"</li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>Ingen forskelle fundet.</p>
+  {% endif %}
+
+   {% if request.args.get('bulk') %}
+    <a href="{{ url_for('aggregator.bulk_results',
+                        queries=request.args.get('queries'),
+                        search_type=request.args.get('search_type')) }}"
+       class="btn btn-secondary mt-3">Tilbage til listen</a>
+  {% else %}
+    <a href="{{ url_for('aggregator.customer_form') }}"
+       class="btn btn-secondary mt-3">Tilbage</a>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,23 +1,13 @@
 from flask_wtf import FlaskForm
-from wtforms import SelectField, StringField, SubmitField
-from wtforms.validators import DataRequired
+from wtforms import StringField, RadioField, FileField, SubmitField
+from wtforms.validators import DataRequired, Optional
 
 class CustomerLookupForm(FlaskForm):
-    """
-    Form for looking up customers by different identifiers.
-    """
-    search_type = SelectField(
+    search_type = RadioField(
         'Søg efter',
-        choices=[
-            ('email', 'E-mail'),
-            ('customer_no', 'Customer No'),
-            ('goodie_id', 'Goodie ID')
-        ],
+        choices=[('email','Email'),('customer_no','Customer No'),('goodie_id','Goodiecard')],
         validators=[DataRequired()]
     )
-    query = StringField(
-        'Søgeværdi',
-        validators=[DataRequired()]
-    )
+    query = StringField('Værdi', validators=[Optional()])
+    file = FileField('Upload fil (.csv eller .xlsx)', validators=[Optional()])
     submit = SubmitField('Søg')
-
