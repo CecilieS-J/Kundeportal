@@ -10,6 +10,7 @@ import pandas as pd
 @aggregator_bp.route('/', methods=['GET', 'POST'])
 def customer_form():
     form = CustomerLookupForm()
+
     if form.validate_on_submit():
         uploaded = form.file.data
         has_file = uploaded and uploaded.filename.lower().endswith(('.csv', '.xlsx'))
@@ -18,12 +19,13 @@ def customer_form():
         if has_file and has_query:
             flash('Vælg enten en søgeværdi eller upload en fil – ikke begge.', 'warning')
             return render_template('customer_search.html', form=form)
+
         if not has_file and not has_query:
             flash('Du skal enten indtaste en søgeværdi eller uploade en fil.', 'warning')
             return render_template('customer_search.html', form=form)
 
         if has_file:
-            # Bulk-upload → parse, gem queries og redirect til GET-route
+            # --- BULK-UPLOAD-gren ---
             agg = CustomerAggregator()
             try:
                 # Læs data fra fil (CSV eller XLSX)
@@ -34,46 +36,36 @@ def customer_form():
                     text = uploaded.stream.read().decode('utf-8')
                     df = pd.read_csv(io.StringIO(text), dtype=str, header=0)
 
-                # Lav mapping fra lowercase til original kolonnenavn
+                # --- Find den korrekte kolonne ud fra form.search_type ---
                 df.columns = df.columns.astype(str)
                 col_map = {col.lower(): col for col in df.columns}
                 key = form.search_type.data
-                # Alternativ mapping af søgetype til kolonnenavne
-                alt_map = {
-                    'goodie_id': ['goodiecard'],
-                    'customer_no': ['customerno', 'customer no'],
-                    'email': ['email']
-                }
-                # Vælg kolonne: direkte match eller alternativt
+
+                # Hvis der ikke findes en direkte kolonne, tjek alternativer
                 if key in col_map:
                     col = col_map[key]
                 else:
                     found = False
+                    alt_map = {
+                        'goodie_id':   ['goodiecard'],
+                        'customer_no': ['customerno', 'customer no'],
+                        'email':       ['email']
+                    }
                     for alt in alt_map.get(key, []):
                         if alt in col_map:
                             col = col_map[alt]
                             found = True
                             break
                     if not found:
-                        # Fallback til første kolonne hvis ingen match
                         if df.empty or df.shape[1] == 0:
                             flash('Filen indeholder ingen kolonner.', 'error')
                             return render_template('customer_search.html', form=form)
                         col = df.columns[0]
-                identifiers = df[col].dropna().astype(str).str.strip().unique()
-                df.columns = df.columns.astype(str)
-                col_map = {col.lower(): col for col in df.columns}
-                key = form.search_type.data
-                if key in col_map:
-                    col = col_map[key]
-                    identifiers = df[col].dropna().astype(str).str.strip().unique()
-                else:
-                    if df.empty or df.shape[1] == 0:
-                        flash('Filen indeholder ingen kolonner.', 'error')
-                        return render_template('customer_search.html', form=form)
-                    identifiers = df.iloc[:, 0].dropna().astype(str).str.strip().unique()
 
-                # Trim “.0” fra værdier
+                # Ekstraher identifikatorer fra den valgte kolonne
+                identifiers = df[col].dropna().astype(str).str.strip().unique()
+
+                # Trim evt. “.0” fra tal, der er blevet læst som floats
                 identifiers = [i[:-2] if i.endswith('.0') else i for i in identifiers]
                 identifiers = [i for i in identifiers if i]
 
@@ -81,23 +73,22 @@ def customer_form():
                     flash('Ingen gyldige rækker fundet i filen.', 'info')
                     return render_template('customer_search.html', form=form)
 
+                # Log kun i denne gren, hvor identifiers er defineret
+                current_app.logger.debug(f"Identifiers fundet i filen: {identifiers!r}")
                 queries = ','.join(identifiers)
+                current_app.logger.debug(f"Samlede queries-streng: {queries!r}")
+
                 return redirect(url_for(
                     'aggregator.bulk_results',
                     queries=queries,
                     search_type=form.search_type.data
                 ))
+
             except Exception as e:
                 flash(f'Fejl ved læsning af fil: {e}', 'error')
                 return render_template('customer_search.html', form=form)
 
-        current_app.logger.debug(f"Identifiers fundet i filen: {identifiers!r}")
-        queries = ','.join(identifiers)
-        current_app.logger.debug(f"Samlede queries-streng: {queries!r}")
-         
-
-
-        # Enkeltsøgning → redirect til details
+        # --- ENKELTSØGNING-gren (has_query er True her) ---
         return redirect(url_for(
             'aggregator.customer_details',
             **{form.search_type.data: form.query.data.strip()}

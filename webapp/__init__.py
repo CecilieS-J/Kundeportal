@@ -11,10 +11,7 @@ from scripts.cli import seed_stale_user, clean_users_command, backup_command, cl
 # Create Flask app instance
 app = Flask(__name__, template_folder="templates", instance_relative_config=True)
 
-##debug
-# Set up logging
-import logging
-logging.basicConfig(level=logging.DEBUG)
+
 
 # Add custom CLI commands
 app.cli.add_command(seed_stale_user)

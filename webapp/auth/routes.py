@@ -15,25 +15,35 @@ from webapp.auth.utils import handle_login, verify_otp
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
+    # If the user is already authenticated, redirect to the homepage
     if current_user.is_authenticated:
         return redirect(url_for('public.home'))
 
+    # Load the login form (username + password fields)
     form = LoginForm()
+
+    # When the form is submitted and passes validation
     if form.validate_on_submit():
-        # Prøv at validere bruger + kodeord og sende OTP
+        # Try to authenticate the user and send a one-time password (OTP)
         user = handle_login(form.username.data, form.password.data)
         if user:
-            # Gem bruger-id til OTP-verificering
+            # Save the user's ID in the session to track OTP verification
             session['otp_user_id'] = user.id
-            session.permanent = True
+            session.permanent = True  # Use Flask's permanent session settings
 
-            flash("Der er nu sendt en SMS-kode til dit nummer. Indtast den for at logge ind.", "info")
-            print("Omdirigerer til verify_otp_route")  #  debug
+            # Inform the user that an OTP has been sent via SMS
+            flash("An SMS code has been sent to your phone. Please enter it to log in.", "info")
+            print("Redirecting to OTP verification route")  # Debug message
+
+            # Redirect to the second step of the login process (OTP verification)
             return redirect(url_for('auth.verify_otp_route'))
         else:
-            flash("Forkert brugernavn eller kodeord", "danger")
+            # Show a generic error message to prevent username enumeration
+            flash("Incorrect username or password", "danger")
 
-    return render_template('login.html', form=form, title="Log ind")
+    # Render the login page with the form
+    return render_template('login.html', form=form, title="Log in")
+
 
 
 @auth_bp.route('/verify-otp', methods=['GET', 'POST'])

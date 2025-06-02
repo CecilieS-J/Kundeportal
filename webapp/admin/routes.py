@@ -22,13 +22,7 @@ admin_mail_logger.addHandler(handler)
 admin_mail_logger.setLevel(logging.DEBUG)
 
 
-@admin_bp.route('/users', methods=['GET'])
-@login_required
-@require_roles(UserRole.admin)
-def list_users():
-    q = request.args.get('q','')
-    users = User.query.filter(User.username.contains(q)).all() if q else User.query.all()
-    return render_template('users.html', users=users, q=q)
+
 
 @admin_bp.route('/users/create', methods=['GET','POST'])
 @login_required
@@ -39,7 +33,7 @@ def create_user():
     if form.validate_on_submit():
         # 1) Generer token + udløbstid (24 timer)
         token = token_urlsafe(32)
-        expires = datetime.now(timezone.utc) + timedelta(hours=12)
+        expires = datetime.now(timezone.utc) + timedelta(days=7)
 
         # 2) Opret bruger UDEN password i databasen
         u = User(
@@ -76,7 +70,7 @@ def create_user():
                 "Din bruger er oprettet og skal nu aktiveres.\n\n"
                 f"Klik på dette link for at vælge et kodeord og aktivere kontoen:\n"
                 f"{activation_link}\n\n"
-                "Linket udløber om 24 timer.\n\n"
+                "Linket udløber om 7 dage.\n\n"
                 "Venlig hilsen\n"
                 "IT-support"
             )
@@ -94,6 +88,16 @@ def create_user():
         admin_mail_logger.debug(f"[admin:create_user] form.errors = {form.errors!r}")
 
     return render_template('create_user.html', form=form)
+
+
+
+@admin_bp.route('/users', methods=['GET'])
+@login_required
+@require_roles(UserRole.admin)
+def list_users():
+    q = request.args.get('q','')
+    users = User.query.filter(User.username.contains(q)).all() if q else User.query.all()
+    return render_template('users.html', users=users, q=q)
 
 @admin_bp.route('/users/edit/<int:user_id>', methods=['GET','POST'])
 @login_required

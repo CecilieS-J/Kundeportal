@@ -36,22 +36,44 @@ def generate_otp():
     return str(random.randint(100000, 999999))
 
 def handle_login(username, password):
+    # Attempt to find the user by username
     user = User.query.filter_by(username=username).first()
-    if user and user.check_password(password):  # bruger din eksisterende password-tjek-metode
+    
+    # If user exists and password is correct (hash comparison)
+    if user and user.check_password(password):  
+        # Generate a 6-digit one-time code (OTP)
         code = generate_otp()
+
+        # Store the OTP and a timestamp in the database for later verification
         user.otp_code = code
         user.otp_timestamp = int(time.time())
         db.session.commit()
+
+        # Send the OTP to the user's phone using SMSEagle
         send_sms(user.phone_number, f"Din login-kode er: {code}")
+        
+        # Return the user object to proceed with OTP verification
         return user
+
+    # If authentication fails, return None
     return None
 
 def verify_otp(user_id, otp_input):
     from time import time
     user = User.query.get(user_id)
+
+    # Check if the user exists, the provided OTP matches,
+    # and the OTP has not expired (older than 5 minutes)
     if user and user.otp_code == otp_input and (time() - user.otp_timestamp) < 300:
-        user.otp_code = None
-        user.otp_timestamp = None
-        db.session.commit()
+        
+        # ✅ OTP is valid — now remove it to prevent reuse (one-time use only)
+        user.otp_code = None                # Clear the one-time password
+        user.otp_timestamp = None           # Clear the timestamp as well
+
+        db.session.commit()                 # Save changes to the database
+
+        # Return the authenticated user object
         return user
+
+    # ❌ OTP is invalid or expired
     return None

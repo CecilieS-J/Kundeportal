@@ -1,13 +1,14 @@
 import os
-import logging
 from webapp import app
 from scripts.backup_script import run_backup
 from scripts.cleanup_backups import run_cleanup
+import logging
 
-
-
-# Configure logging
-logging.basicConfig(level=logging.DEBUG)
+# global logging-opsætning
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s %(name)s %(levelname)s %(message)s'
+)
 
 
 def test_sfcc():
@@ -15,9 +16,9 @@ def test_sfcc():
     print("🔧 Running SFCC test...")
 
     # Settings og credentials
-    from config import sfcc_client_id, sfcc_secret, sfcc_user, sfcc_password, sfcc_instance
-    from webapp.services.sfcc_service.utils import get_customer_lists  # Vi bruger kun dette
-    from webapp.services.sfcc_service.client import OCAPI_Authenticate_OAuth2
+    from config import sfcc_client_id, sfcc_secret
+    from webapp.sfcc_service.utils import get_customer_lists  
+    from webapp.sfcc_service.client import OCAPI_Authenticate_OAuth2
 
     instance = "dev"
     country = "dk"
@@ -25,7 +26,7 @@ def test_sfcc():
     customer_no = "00258536"
     list_id = f"mdn/customers/{customer_no}"
 
-    # Step 1: Hent token via APIClientID
+    # Step 1: Get token from APIClientID
     token, message = OCAPI_Authenticate_OAuth2(
         instance=instance,
         authType="APIClientID",
@@ -35,13 +36,13 @@ def test_sfcc():
     print(f"🔐 Token (ClientID): {token}")
     print(f"ℹ️ {message}")
 
-    # Step 2: Lookup på customer_id og alt anden relevant data
+    # Step 2: Lookup on customer_id and others of relevance
     customer_data = get_customer_lists(instance, sfcc_client_id, token, country, site_id, list_id)
 
     print("📄 Full customer_data from get_customer_lists():")
     print(json.dumps(customer_data, indent=2))
 
-    # Udtræk specifikke felter
+    # Specifikc fields of customer data to get output
     summary = {
         "customer_id": customer_data.get("customer_id"),
         "customer_no": customer_data.get("customer_no"),
@@ -59,7 +60,7 @@ def test_sfcc():
     print("\n👤 SFCC Customer Summary:")
     print(json.dumps(summary, indent=2))
 
-    # Step 3 og 4 er midlertidigt udkommenteret, da de fejler med 403:
+    # Step 3 og 4 er midlertidigt udkommenteret, da de fejler med 403 grundet manglende tilladelser:
     #
     # token, message = OCAPI_Authenticate_OAuth2(
     #     instance=instance,
@@ -80,18 +81,18 @@ def test_sfcc():
 
 
 def test_omneo():
-    from webapp.services.omneo_service.service import OmneoService  
+    from webapp.omneo_service.service import OmneoService  
 
     service = OmneoService()
 
     # Test med GoodieCard ID
     customer_id = "83017843"
-    result = service.fetch_member_by_id(customer_id)
+    result = service.fetch_by_card_pos(customer_id)
     print("GoodieCard result:", result)
 
     # Test med e-mail
     email = "magasintest+blocked@protonmail.com"
-    result = service.fetch_member_by_email(email)
+    result = service.fetch_by_email(email)
     print("Email result:", result)
 
 
@@ -195,13 +196,9 @@ def main():
             print("📦 Application shutting down. Starting backup and cleanup...")
 
             # Run backup
-            try:
-              print("🔄 Kører backup...")
-              run_backup()
-              print("✅ Backup gennemført.")
-            except Exception as e:
-               print(f"❌ FEJL i run_backup(): {e}")
-
+            run_backup()
+            
+             
             # Run cleanup
             try:
               print("🧹 Kører oprydning af gamle backups...")

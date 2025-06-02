@@ -61,22 +61,29 @@ def search_customers_mdm():
 def event_log():
     """
     Displays the event log for a given customer based on goodie ID.
+    Access is restricted to users with the 'admin' or 'it_supporter' role.
     """
-    form = EventForm()
-    events = []
 
+    # Initialize the form used to input the goodie ID
+    form = EventForm()
+    events = []  # Will store the event log results
+
+    # If the form is submitted and passes validation
     if form.validate_on_submit():
+        # Read and clean the goodie ID from the form input
         gid = form.goodie_id.data.strip()
 
-        # Opret instans af CustomerExternalService
+        # Create an instance of the external service integration
         service = CustomerExternalService()
 
-        # Kald fetch_event_log via instansen
+        # Call the service method to fetch events for the given goodie ID
         events = service.fetch_event_log(goodie_id=gid)
 
+    # Render the event log page with form and results (if any)
     return render_template(
         'event_log.html',
         form=form,
         events=events
     )
+
 
