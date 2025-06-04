@@ -10,3 +10,13 @@ logs/
 
 # Ignorer miljøfiler
 .env
+
+
+# Ignorer Python-venv-mappe
+.venv/  # eller venv/, alt efter navngivning
+
+# Ignorer cachefiler fra Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd

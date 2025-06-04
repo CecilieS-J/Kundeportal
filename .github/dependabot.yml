@@ -1,15 +1,11 @@
 version: 2
 updates:
   - package-ecosystem: "pip"
-    directory: "/"  # Ret dette hvis din requirements.txt ligger i en anden mappe
+    directory: "/"  
     schedule:
-      interval: "weekly"   # Tjek én gang om ugen
+      interval: "weekly"   
     open-pull-requests-limit: 5
 
-  - package-ecosystem: "npm"
-    directory: "/"  # Ret hvis din package.json ligger i en anden mappe (fx /frontend)
-    schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 5
+  
 
 
