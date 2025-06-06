@@ -12,9 +12,9 @@
         <div class="card-body">
           <h5 class="card-title">Søgning: {{ res.query }}</h5>
           <p>
-            Goodiecard: {{ res.external.goodiecard or '–' }}<br>
-            Email:       {{ res.external.email       or '–' }}<br>
-            Customer No: {{ res.external.customer_no or '–' }}
+            Goodiecard: {{ res.mdm.goodiecard or '–' }}<br>
+            Email:       {{ res.mdm.email       or '–' }}<br>
+            Customer No: {{ res.mdm.customer_no or '–' }}
           </p>
           <a href="{{ url_for('aggregator.customer_details',
                               **{ search_type: res.query,

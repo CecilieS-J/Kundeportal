@@ -27,11 +27,11 @@
           <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
             <li>
               <abbr title="…you wish">
-                <a class="dropdown-item" href="{{ url_for('external_customer.search_customers_mdm') }}">Søg kunde i MDM</a>
+                <a class="dropdown-item" href="{{ url_for('mdm_service.search_customers_mdm') }}">Søg kunde i MDM</a>
                 <li><hr class="dropdown-divider"></li>
               </abbr>
               <abbr title="Vis eventlog for én eller flere kunder">
-                <a class="dropdown-item" href="{{ url_for('external_customer.event_log') }}">Event-log</a>
+                <a class="dropdown-item" href="{{ url_for('mdm_service.event_log') }}">Event-log</a>
               </abbr>
             </li>
           </ul>
@@ -49,7 +49,7 @@
               <li><hr class="dropdown-divider"></li>
               </abbr>
               <abbr title="Identificér dubletter i Brevo baseret på e-mail og SIB ID">
-                <a class="dropdown-item" href="{{ url_for('external_customer.search_customers_mdm') }}">Dubletter i Brevo</a>
+                <a class="dropdown-item" href="{{ url_for('mdm_service.search_customers_mdm') }}">Dubletter i Brevo</a>
 
               </abbr>
             </li>
@@ -96,11 +96,11 @@
           <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
             <li>
               <abbr title="Udtrækker alle kunder, der mangler i mindst ét system">
-                <a class="dropdown-item" href="{{ url_for('external_customer.search_customers_mdm') }}">Auto kundeudtræk</a>
+                <a class="dropdown-item" href="{{ url_for('mdm_service.search_customers_mdm') }}">Auto kundeudtræk</a>
                 <li><hr class="dropdown-divider"></li>
               </abbr>
               <abbr title="Valider e-mailadresser på tværs af systemer for syntaks og API-status">
-                <a class="dropdown-item" href="{{ url_for('external_customer.search_customers_mdm') }}">Ugyldig e-mails</a>
+                <a class="dropdown-item" href="{{ url_for('mdm_service.search_customers_mdm') }}">Ugyldig e-mails</a>
                 <li><hr class="dropdown-divider"></li>
               </abbr>
               <abbr title="Sammenlign felter som navn, e-mail og ID’er på tværs af MDM, SFCC, Omneo og Brevo">

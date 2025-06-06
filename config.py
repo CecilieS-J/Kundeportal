@@ -22,7 +22,7 @@ class Settings(BaseSettings):
         ),
     )
     SQLALCHEMY_TRACK_MODIFICATIONS: bool = False
-    EXTERNAL_DATABASE_URL: AnyUrl  
+    MDM_DATABASE_URL: AnyUrl  
 
     # Session/Cookie settings for security and expiration
     SESSION_PERMANENT: bool = True

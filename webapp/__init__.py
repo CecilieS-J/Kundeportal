@@ -169,7 +169,7 @@ def inject_user_role():
 # Import and register blueprints in desired order
 from webapp.auth         import auth_bp
 from webapp.admin        import admin_bp
-from webapp.external_customer_service.routes import external_customer_service_bp
+from webapp.mdm_service import mdm_service_bp
 from webapp.routes       import public_bp
 from webapp.brevo_service import brevo_service_bp
 from webapp.sfcc_service import sfcc_service_bp
@@ -183,6 +183,6 @@ app.register_blueprint(sfcc_service_bp)
 app.register_blueprint(brevo_service_bp)
 app.register_blueprint(auth_bp)           
 app.register_blueprint(admin_bp)          
-app.register_blueprint(external_customer_service_bp)   
+app.register_blueprint(mdm_service_bp)   
 app.register_blueprint(public_bp)         
 

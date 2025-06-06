@@ -1,12 +1,12 @@
 from sqlalchemy import text
-from webapp.external_customer_service.client import ExternalSession
+from webapp.mdm_service.client import MdmSession
 
 
-class CustomerExternalService:
+class MdmService:
     """
-    Retrieves data from the external database (customer table) and returns it as a dictionary.
+    Retrieves data from the mdm (customer table) and returns it as a dictionary.
     """
-    def fetch_external(self,
+    def fetch_mdm(self,
                        goodie_id=None,
                        email=None,
                        customer_no=None,
@@ -47,12 +47,12 @@ class CustomerExternalService:
             params['sib_id'] = sib_id
 
         stmt = text(sql)
-        with ExternalSession() as session:
+        with MdmSession() as session:
             row = session.execute(stmt, params).mappings().first()
         return dict(row) if row else {}
 
-    def fetch_external_customer(self, **kwargs):
-        return self.fetch_external(**kwargs)
+    def fetch_mdm_customer(self, **kwargs):
+        return self.fetch_mdm(**kwargs)
     
     
 
@@ -84,7 +84,7 @@ class CustomerExternalService:
             ORDER BY ts DESC
         """
         stmt = text(sql)
-        with ExternalSession() as session:
+        with MdmSession() as session:
             rows = session.execute(stmt, {"val": val}).mappings().all()
 
         return [dict(r) for r in rows]

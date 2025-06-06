@@ -2,7 +2,7 @@
 {% block content %}
   <h1>Data for Goodie ID: {{ goodie_id }}</h1>
 
-  {% if external %}
+  {% if mdm %}
     <h3>Customer Fields</h3>
     <table class="table table-striped">
       <thead>
@@ -15,7 +15,7 @@
         {% for field in ['customer_id', 'first_name', 'last_name', 'email', 'omneo_id', 'customer_no', 'sib_id', 'clientela_id'] %}
         <tr>
           <td>{{ field.replace('_', ' ').capitalize() }}</td>
-          <td>{{ external[field] or '–' }}</td>
+          <td>{{ mdm[field] or '–' }}</td>
         </tr>
         {% endfor %}
       </tbody>
@@ -26,7 +26,7 @@
     </div>
   {% endif %}
 
-  <a href="{{ url_for('external_customer.search_customers_mdm') }}" class="btn btn-secondary">
+  <a href="{{ url_for('mdm_service.search_customers_mdm') }}" class="btn btn-secondary">
     Tilbage
   </a>
 {% endblock %}

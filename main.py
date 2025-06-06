@@ -3,7 +3,8 @@ from webapp import app
 from scripts.backup_script import run_backup
 from scripts.cleanup_backups import run_cleanup
 import logging
-import scripts.smoke_tests as smoke_tests
+#import scripts.smoke_tests as smoke_tests
+
 # global logging-opsætning
 logging.basicConfig(
     level=logging.DEBUG,

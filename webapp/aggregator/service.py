@@ -1,19 +1,19 @@
-from ..external_customer_service.service import CustomerExternalService
+from ..mdm_service.service import MdmService
 from ..sfcc_service.service import SFCCService
 from ..brevo_service.service import BrevoService
 from ..omneo_service.service import OmneoService
 
 class CustomerAggregator:
     """
-    Aggregates and normalizes customer data from External DB, SFCC, Brevo, and Omneo.
+    Aggregates and normalizes customer data from MDM, SFCC, Brevo, and Omneo.
     Supports lookup by customer_no, email, goodie_id, or sib_id.
     """
     def __init__(self,
-                 external_service: CustomerExternalService = None,
+                 mdm_service: MdmService = None,
                  sfcc_service:     SFCCService           = None,
                  brevo_service:    BrevoService          = None,
                  omneo_service:    OmneoService          = None):
-        self.external_service = external_service or CustomerExternalService()
+        self.mdm_service = mdm_service or MdmService()
         self.sfcc_service     = sfcc_service     or SFCCService()
         self.brevo_service    = brevo_service    or BrevoService()
         self.omneo_service    = omneo_service    or OmneoService()
@@ -29,10 +29,10 @@ class CustomerAggregator:
         2) Else use goodie_id.
         3) Else use email.
         4) Else use sib_id.
-        Fetch external first to obtain customer_no and email for other systems.
+        Fetch mdm first to obtain customer_no and email for other systems.
         Then fetch SFCC by customer_no, Brevo by email, and Omneo by email or goodiecard.
         """
-        # --- External lookup ---
+        # --- MDM lookup ---
         lookup_kwargs = {}
         if customer_no:
             lookup_kwargs['customer_no'] = customer_no
@@ -43,7 +43,7 @@ class CustomerAggregator:
         elif sib_id:
             lookup_kwargs['sib_id'] = sib_id
 
-        raw_ext = self.external_service.fetch_external_customer(**lookup_kwargs) or {}
+        raw_ext = self.mdm_service.fetch_mdm_customer(**lookup_kwargs) or {}
         customer_no = customer_no or raw_ext.get('customer_no')
         email       = email       or raw_ext.get('email')
 
@@ -74,10 +74,10 @@ class CustomerAggregator:
             'phone_home', 'phone_mobile'
         ]
 
-        # --- Normalize External ---
-        external = {k: None for k in fields}
+        # --- Normalize mdm ---
+        mdm = {k: None for k in fields}
         if raw_ext:
-            external.update({
+            mdm.update({
                 'first_name':   raw_ext.get('first_name'),
                 'last_name':    raw_ext.get('last_name'),
                 'goodiecard':   str(raw_ext.get('customer_id')) if raw_ext.get('customer_id') else None,
@@ -143,13 +143,13 @@ class CustomerAggregator:
             })
 
         # --- Event log ---
-        events = self.external_service.fetch_event_log(
+        events = self.mdm_service.fetch_event_log(
             customer_no=customer_no,
             email=email
         ) or []
 
         return {
-            'external': external,
+            'mdm': mdm,
             'sfcc':     sfcc,
             'brevo':    brevo,
             'omneo':    omneo,

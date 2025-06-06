@@ -4,23 +4,23 @@
 
 {% block content %}
 <div class="container mt-4">
-  {%- set search_val = external.get('goodiecard') or '-' -%}
+  {%- set search_val = mdm.get('goodiecard') or '-' -%}
   <h2>Resultater for Goodiecard {{ search_val }}</h2>
 
   <!-- Fundet i -->
   <h4>Fundet i</h4>
   <ul>
     {% if brevo %}<li>Brevo</li>{% endif %}
-    {% if external %}<li>External</li>{% endif %}
+    {% if mdm %}<li>MDM</li>{% endif %}
     {% if omneo %}<li>Omneo</li>{% endif %}
     {% if sfcc %}<li>SFCC</li>{% endif %}
-    {% if not brevo and not external and not omneo and not sfcc %}<li>Ingen systemer</li>{% endif %}
+    {% if not brevo and not mdm and not omneo and not sfcc %}<li>Ingen systemer</li>{% endif %}
   </ul>
 
   <!-- Alle data -->
   {% set unsupported = {
     'brevo':   ['omneo_id'],
-    'external': [],
+    'mdm': [],
     'omneo':   ['sib_id', 'phone_home'],
     'sfcc':    ['sib_id', 'phone_mobile']
   } %}
@@ -31,14 +31,14 @@
         <tr>
           <th>Felt</th>
           <th>Brevo</th>
-          <th>External</th>
+          <th>MDM</th>
           <th>Omneo</th>
           <th>SFCC</th>
         </tr>
       </thead>
       <tbody>
         {# Exclude data_pretty and remove birthday #}
-        {%- set keys = external.keys()|select('ne','data_pretty')|reject('equalto','birthday')|list -%}
+        {%- set keys = mdm.keys()|select('ne','data_pretty')|reject('equalto','birthday')|list -%}
         {%- for sys in ['brevo','omneo','sfcc'] -%}
           {%- for key in (sys=='brevo' and brevo or (sys=='omneo' and omneo or sfcc)).keys() if key not in keys and key != 'birthday' -%}
             {%- set _ = keys.append(key) -%}
@@ -56,8 +56,8 @@
               {{ brevo.get(key, '–') }}
             {% endif %}
           </td>
-          <!-- External -->
-          <td>{{ external.get(key, '–') }}</td>
+          <!-- mdm -->
+          <td>{{ mdm.get(key, '–') }}</td>
           <!-- Omneo -->
           <td>
             {% if key in unsupported['omneo'] %}
@@ -86,7 +86,7 @@
   {% for key in keys %}
     {% set vals = [] %}
     {% if key not in unsupported['brevo'] %}{% set _ = vals.append(brevo.get(key)) %}{% endif %}
-    {% if key not in unsupported['external'] %}{% set _ = vals.append(external.get(key)) %}{% endif %}
+    {% if key not in unsupported['mdm'] %}{% set _ = vals.append(mdm.get(key)) %}{% endif %}
     {% if key not in unsupported['omneo'] %}{% set _ = vals.append(omneo.get(key)) %}{% endif %}
     {% if key not in unsupported['sfcc'] %}{% set _ = vals.append(sfcc.get(key)) %}{% endif %}
 
@@ -100,7 +100,7 @@
       {% set diffs = diffs + [{
         'field': key,
         'brevo': brevo.get(key) is none and '' or (brevo.get(key)|string),
-        'external': external.get(key) is none and '' or (external.get(key)|string),
+        'mdm': mdm.get(key) is none and '' or (mdm.get(key)|string),
         'omneo': omneo.get(key) is none and '' or (omneo.get(key)|string),
         'sfcc': sfcc.get(key) is none and '' or (sfcc.get(key)|string)
       }] %}
@@ -110,7 +110,7 @@
   {% if diffs %}
     <ul>
       {% for d in diffs %}
-      <li><strong>{{ d.field|replace('_',' ')|title }}</strong>: Brevo="{{ d.brevo }}", External="{{ d.external }}", Omneo="{{ d.omneo }}", SFCC="{{ d.sfcc }}"</li>
+      <li><strong>{{ d.field|replace('_',' ')|title }}</strong>: Brevo="{{ d.brevo }}", MDM="{{ d.mdm }}", Omneo="{{ d.omneo }}", SFCC="{{ d.sfcc }}"</li>
       {% endfor %}
     </ul>
   {% else %}
