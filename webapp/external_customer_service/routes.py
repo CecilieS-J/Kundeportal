@@ -1,6 +1,6 @@
 from flask import render_template
 from flask_login import login_required
-from webapp.auth.utils import require_roles
+from webapp.auth.service import require_roles
 from webapp.models import UserRole
 from . import external_customer_service_bp
 from .forms import GoodieForm, EventForm

@@ -11,7 +11,7 @@ from .forms import LoginForm, ChangePasswordForm, OTPForm
 from webapp import db
 from webapp.models import User
 from webapp.auth import auth_bp
-from webapp.auth.utils import handle_login, verify_otp
+from webapp.auth.service import handle_login, verify_otp, record_login
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
@@ -47,8 +47,9 @@ def verify_otp_route():
         user = verify_otp(user_id, form.otp.data)
         if user:
             login_user(user)
+            record_login(user_id=user.id, ip=request.remote_addr)
             session.pop('otp_user_id', None)
-            return redirect(url_for('public.home'))  # eller dashboard etc.
+            return redirect(url_for('public.home'))  
 
         flash("Ugyldig eller udløbet kode", "danger")
 

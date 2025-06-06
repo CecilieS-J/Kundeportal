@@ -6,7 +6,7 @@
     <thead>
       <tr>
         <th>Tidspunkt</th>
-        <th>Bruger</th>
+        <th>Bruger (ID)</th>
         <th>IP-adresse</th>
       </tr>
     </thead>
@@ -14,12 +14,14 @@
       {% for entry in entries %}
         <tr>
           <td>{{ entry.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
-          <td>{{ entry.user.username }}</td>
+          <td>{{ entry.user_id }}</td>
           <td>{{ entry.ip_address or '-' }}</td>
         </tr>
       {% endfor %}
       {% if not entries %}
-        <tr><td colspan="3" class="text-center">Ingen historik fundet.</td></tr>
+        <tr>
+          <td colspan="3" class="text-center">Ingen historik fundet.</td>
+        </tr>
       {% endif %}
     </tbody>
   </table>

@@ -59,12 +59,13 @@ class CustomerAggregator:
 
         # --- Omneo lookup ---
         raw_omneo = {}
-        if email:
-            omneo_profiles = self.omneo_service.fetch_by_email(email)
-            raw_omneo = omneo_profiles[0] if omneo_profiles else {}
-        elif goodie_id:
+        if goodie_id:
             omneo_profiles = self.omneo_service.fetch_by_card_pos(goodie_id)
             raw_omneo = omneo_profiles[0] if omneo_profiles else {}
+        elif email:
+            omneo_profiles = self.omneo_service.fetch_by_email(email)
+            raw_omneo = omneo_profiles[0] if omneo_profiles else {}
+            
 
         # --- Standardized fields ---
         fields = [

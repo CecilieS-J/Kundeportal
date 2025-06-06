@@ -1,9 +1,12 @@
 import sys
 import os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+import config 
 import requests
 import json
-import config as config
+
 
 
 
@@ -77,6 +80,7 @@ def OCAPI_Authenticate_OAuth2(instance, authType, sfcc_client_id, sfcc_secret, s
         return access_token, message
     
 if __name__ == "__main__":
+  
     # Example usage
     instance = "dev" # "prd" or "stg" or "dev"
     sfcc_authType = "APIClientID" # "APIClientID" or "BusinessManager"

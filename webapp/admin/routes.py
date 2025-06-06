@@ -1,4 +1,3 @@
-# webapp/admin/routes.py
 from secrets import token_urlsafe
 import os
 from webapp.admin import admin_bp
@@ -6,20 +5,27 @@ from flask import render_template, redirect, url_for, flash, request
 from flask_login import login_required
 from webapp import db
 from webapp.models import User, UserRole, LoginHistory
-from webapp.auth.utils import require_roles
+from webapp.auth.service import require_roles
 from .forms import CreateUserForm, EditUserForm
 from webapp.mail import send_alert
-import logging
 from sqlalchemy.exc import IntegrityError
 from werkzeug.security import generate_password_hash
 from datetime import datetime, timedelta, timezone
-
+import logging
 
 admin_mail_logger = logging.getLogger('admin-mail')
 handler = logging.StreamHandler()
-handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s %(message)s'))
+handler.setFormatter(logging.Formatter(
+    '%(asctime)s %(name)-20s %(levelname)-8s %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
+))
 admin_mail_logger.addHandler(handler)
 admin_mail_logger.setLevel(logging.DEBUG)
+
+# Sørger for, at beskeder IKKE sendes videre til root:
+admin_mail_logger.propagate = False
+
+
 
 
 

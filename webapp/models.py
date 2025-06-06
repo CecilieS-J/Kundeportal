@@ -69,7 +69,7 @@ class LoginHistory(db.Model):
     __tablename__ = 'login_history'
     id           = db.Column(db.Integer, primary_key=True)
     user_id      = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    timestamp    = db.Column(db.DateTime, default=datetime.utcnow)
+    timestamp    = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     ip_address   = db.Column(db.String)
     user         = db.relationship('User', backref='login_history')
 

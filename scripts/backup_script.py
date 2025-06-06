@@ -8,8 +8,7 @@ logger = logging.getLogger('maintenance.backup')
 
 def run_backup():
     """
-    Copier SQLite-databasen til en timestamped backup-fil
-    og logger processen i stedet for at printe.
+    Copy the SQLite database to a timestamped backup file and log the process instead of printing.
     """
     db_path = os.path.join("instance", "customer_data.db")
     backup_dir = "backups"
@@ -20,7 +19,7 @@ def run_backup():
 
     # Tjek om databasefilen eksisterer
     if not os.path.exists(db_path):
-        logger.error("❌ FEJL: Kan ikke finde databasefilen: %s", os.path.abspath(db_path))
+        logger.error("Error: Can not find the db-file: %s", os.path.abspath(db_path))
         return
 
     # Opret backup-mappen hvis den ikke findes
@@ -33,7 +32,7 @@ def run_backup():
 
     try:
         shutil.copy2(db_path, backup_path)
-        logger.info("✅ Backup gemt som: %s", backup_path)
+        logger.info("Backup saved as: %s", backup_path)
     except Exception as e:
         # logger.exception() medtager stack trace
-        logger.exception("❌ FEJL i run_backup(): %s", e)
+        logger.exception("Error in run_backup(): %s", e)
