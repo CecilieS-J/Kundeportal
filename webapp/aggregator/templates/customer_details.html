@@ -92,6 +92,7 @@
     <p>Ingen forskelle fundet.</p>
   {% endif %}
 
+  {# 
   <!-- Event-log -->
   <h2>Event-log</h2>
   {% if events %}
@@ -129,6 +130,7 @@
   {% else %}
     <div class="alert alert-warning">Ingen events fundet for Goodiecard {{ search_val }}.</div>
   {% endif %}
+  #}
 
   {% if request.args.get('bulk') %}
     <a href="{{ url_for('aggregator.bulk_results',

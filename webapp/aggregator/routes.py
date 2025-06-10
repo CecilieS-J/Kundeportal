@@ -121,7 +121,7 @@ def bulk_results():
         data = agg.fetch_customer(**{search_type: q})
         results.append({
             'query': q,
-            'mdm': data.get('mdm', {}),
+            'external': data.get('external', {}),
             'brevo': data.get('brevo', {}),
             'omneo': data.get('omneo', {}),
             'sfcc': data.get('sfcc', {}),
@@ -170,7 +170,7 @@ def customer_details():
         mdm=result.get('mdm', {}),
         omneo=result.get('omneo', {}),
         sfcc=result.get('sfcc', {}),
-        events=result.get('events', []),
+        #events=result.get('events', []),
         diffs=diffs,
         bulk=bulk_flag,
         queries=queries,
