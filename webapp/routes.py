@@ -18,14 +18,15 @@ def home():
 
 
 
-# Du kan tilføje flere use-case-routes her, f.eks. completeness, duplicates, osv.
-# Bare husk at dekorere med @login_required
 
-# Fallback for alle andre URLs (valgfrit)
+
+# Fallback for others # routes that are not defined
 @public_bp.app_errorhandler(404)
 def page_not_found(e):
     if not current_user.is_authenticated:
-        # Anonyme brugere sendes til login
+        # Anonymes users sends to login
+        # Redirect to login page with the original path as next parameter
+        # This allows the user to be redirected back after login
         return redirect(url_for('auth.login', next=request.path))
-    # For indloggede: vis en simpel 404
+    # If user is authenticated, show a custom 404 page
     return render_template('404.html', title="Side ikke fundet"), 404

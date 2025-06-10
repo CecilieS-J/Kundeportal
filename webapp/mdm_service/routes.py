@@ -10,7 +10,7 @@ import pandas as pd
 
 @mdm_service_bp.route('/search', methods=['GET', 'POST'])
 @login_required
-@require_roles(UserRole.admin, UserRole.it_supporter)
+@require_roles(UserRole.admin, UserRole.it_supporter, UserRole.watcher)
 def search_customers_mdm():
     """
     Allows data responsible and IT support users to search for customer data in MDM.

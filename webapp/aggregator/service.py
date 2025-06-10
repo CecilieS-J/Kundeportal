@@ -155,3 +155,55 @@ class CustomerAggregator:
             'omneo':    omneo,
             'events':   events
         }
+
+    def find_differences(self, brevo: dict, mdm: dict, omneo: dict, sfcc: dict) -> list:
+        """
+        Find differences between brevo, mdm, omneo, and sfcc datasets for each field.
+        Excludes unsupported fields and the 'birthday' field.
+        Returns a list of dictionaries with fields that have differing values.
+        """
+        unsupported = {
+            'brevo': ['omneo_id'],
+            'mdm': [],
+            'omneo': ['sib_id', 'phone_home'],
+            'sfcc': ['sib_id', 'phone_mobile']
+        }
+
+        # Collect all keys, excluding 'data_pretty' and 'birthday'
+        keys = [k for k in mdm.keys() if k not in ['data_pretty', 'birthday']]
+        for sys in ['brevo', 'omneo', 'sfcc']:
+            sys_data = brevo if sys == 'brevo' else omneo if sys == 'omneo' else sfcc
+            for key in sys_data.keys():
+                if key not in keys and key != 'birthday':
+                    keys.append(key)
+
+        diffs = []
+        for key in keys:
+            vals = []
+            if key not in unsupported['brevo']:
+                vals.append(brevo.get(key))
+            if key not in unsupported['mdm']:
+                vals.append(mdm.get(key))
+            if key not in unsupported['omneo']:
+                vals.append(omneo.get(key))
+            if key not in unsupported['sfcc']:
+                vals.append(sfcc.get(key))
+
+            # Convert values to strings, treating None as empty string
+            uniq = []
+            for v in vals:
+                vs = '' if v is None else str(v)
+                if vs and vs not in uniq:
+                    uniq.append(vs)
+
+            # If there are multiple unique values, record the difference
+            if len(uniq) > 1:
+                diffs.append({
+                    'field': key,
+                    'brevo': '' if brevo.get(key) is None else str(brevo.get(key)),
+                    'mdm': '' if mdm.get(key) is None else str(mdm.get(key)),
+                    'omneo': '' if omneo.get(key) is None else str(omneo.get(key)),
+                    'sfcc': '' if sfcc.get(key) is None else str(sfcc.get(key))
+                })
+
+        return diffs

@@ -82,31 +82,6 @@
 
   <!-- Forskelle -->
   <h4>Forskelle</h4>
-  {% set diffs = [] %}
-  {% for key in keys %}
-    {% set vals = [] %}
-    {% if key not in unsupported['brevo'] %}{% set _ = vals.append(brevo.get(key)) %}{% endif %}
-    {% if key not in unsupported['mdm'] %}{% set _ = vals.append(mdm.get(key)) %}{% endif %}
-    {% if key not in unsupported['omneo'] %}{% set _ = vals.append(omneo.get(key)) %}{% endif %}
-    {% if key not in unsupported['sfcc'] %}{% set _ = vals.append(sfcc.get(key)) %}{% endif %}
-
-    {% set uniq = [] %}
-    {% for v in vals %}
-      {% set vs = v is none and '' or (v|string) %}
-      {% if vs and vs not in uniq %}{% set _ = uniq.append(vs) %}{% endif %}
-    {% endfor %}
-
-    {% if uniq|length > 1 %}
-      {% set diffs = diffs + [{
-        'field': key,
-        'brevo': brevo.get(key) is none and '' or (brevo.get(key)|string),
-        'mdm': mdm.get(key) is none and '' or (mdm.get(key)|string),
-        'omneo': omneo.get(key) is none and '' or (omneo.get(key)|string),
-        'sfcc': sfcc.get(key) is none and '' or (sfcc.get(key)|string)
-      }] %}
-    {% endif %}
-  {% endfor %}
-
   {% if diffs %}
     <ul>
       {% for d in diffs %}
@@ -117,7 +92,45 @@
     <p>Ingen forskelle fundet.</p>
   {% endif %}
 
-   {% if request.args.get('bulk') %}
+  <!-- Event-log -->
+  <h2>Event-log</h2>
+  {% if events %}
+    <table class="table table-sm table-striped">
+      <thead>
+        <tr>
+          <th>Event ID</th>
+          <th>Timestamp</th>
+          <th>Type</th>
+          <th>System</th>
+          <th>Email</th>
+          <th>First name</th>
+          <th>Data (JSON)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for ev in events %}
+        <tr>
+          <td>{{ ev.event_id }}</td>
+          <td>{{ ev.timestamp }}</td>
+          <td>{{ ev.type }}</td>
+          <td>{{ ev.system }}</td>
+          <td>{{ ev.email or '–' }}</td>
+          <td>{{ ev.first_name or '–' }}</td>
+          <td>
+            <details>
+              <summary>Vis JSON</summary>
+              <pre>{{ ev.data_json | tojson(indent=2) }}</pre>
+            </details>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <div class="alert alert-warning">Ingen events fundet for Goodiecard {{ search_val }}.</div>
+  {% endif %}
+
+  {% if request.args.get('bulk') %}
     <a href="{{ url_for('aggregator.bulk_results',
                         queries=request.args.get('queries'),
                         search_type=request.args.get('search_type')) }}"

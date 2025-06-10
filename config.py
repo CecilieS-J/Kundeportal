@@ -36,10 +36,10 @@ class Settings(BaseSettings):
     MAILGUN_DOMAIN: str              
     MAILGUN_API_KEY: str     
 
-    # 🔽 Brevo settings
+    # Brevo settings
     BREVO_API_KEY: str
 
-    # 🔽 SFCC settings (til token)
+    # SFCC settings (til token)
     SFCC_CLIENT_ID: str
     SFCC_CLIENT_SECRET: str
     SFCC_USER: str
@@ -48,7 +48,7 @@ class Settings(BaseSettings):
     SFCC_INSTANCE: str
 
 
-    # 🔽 Omneo settings
+    # Omneo settings
     OMNEO_API_TOKEN: str
     OMNEO_BASE_URL: str
 
@@ -67,7 +67,7 @@ class Settings(BaseSettings):
 # Single global instance of Settings
 settings = Settings()
 
-# ✅ Legacy alias-style (til din gamle codebase)
+# Legacy alias-style (til din gamle codebase)
 sfcc_client_id = settings.SFCC_CLIENT_ID
 sfcc_secret = settings.SFCC_CLIENT_SECRET
 sfcc_user = settings.SFCC_USER

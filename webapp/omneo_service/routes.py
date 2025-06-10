@@ -2,9 +2,14 @@ from flask import render_template, redirect, url_for, request
 from webapp.omneo_service.forms import OmneoLookupForm
 from webapp.omneo_service.service import OmneoService
 from webapp.omneo_service import omneo_service_bp
+from flask_login import login_required
+from webapp.auth.service import require_roles
+from webapp.models import UserRole
 
 @omneo_service_bp.route("/lookup", methods=["GET", "POST"])
-def lookup():
+@login_required
+@require_roles(UserRole.admin, UserRole.it_supporter, UserRole.watcher)
+def lookup_customer():
     form = OmneoLookupForm()
     service = OmneoService()
     results = []
@@ -43,7 +48,7 @@ def lookup():
             error = f"Fejl ved hentning af profiler: {str(e)}"
 
     return render_template(
-        "lookup.html",
+        "omneo_lookup.html",
         form=form,
         results=results,
         error=error,
@@ -51,6 +56,8 @@ def lookup():
     )
 
 @omneo_service_bp.route("/lookup/profile/<profile_id>")
+@login_required
+@require_roles(UserRole.admin, UserRole.it_supporter, UserRole.watcher)
 def profile_detail(profile_id):
     service = OmneoService()
     profile = service.fetch_profile_by_id(profile_id)

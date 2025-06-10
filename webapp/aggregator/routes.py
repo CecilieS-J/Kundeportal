@@ -4,10 +4,15 @@ from flask import (
 from . import aggregator_bp
 from .forms import CustomerLookupForm
 from .service import CustomerAggregator
+from flask_login import login_required
+from webapp.auth.service import require_roles
+from webapp.models import UserRole
 import io
 import pandas as pd
 
 @aggregator_bp.route('/', methods=['GET', 'POST'])
+@login_required
+@require_roles(UserRole.admin, UserRole.it_supporter, UserRole.watcher)
 def customer_form():
     form = CustomerLookupForm()
 
@@ -98,6 +103,8 @@ def customer_form():
 
 
 @aggregator_bp.route('/bulk', methods=['GET'])
+@login_required
+@require_roles(UserRole.admin, UserRole.it_supporter, UserRole.watcher)
 def bulk_results():
     queries = request.args.get('queries', '')
     search_type = request.args.get('search_type')
@@ -114,7 +121,7 @@ def bulk_results():
         data = agg.fetch_customer(**{search_type: q})
         results.append({
             'query': q,
-            'external': data.get('external', {}),
+            'mdm': data.get('mdm', {}),
             'brevo': data.get('brevo', {}),
             'omneo': data.get('omneo', {}),
             'sfcc': data.get('sfcc', {}),
@@ -130,6 +137,8 @@ def bulk_results():
 
 
 @aggregator_bp.route('/details', methods=['GET'])
+@login_required
+@require_roles(UserRole.admin, UserRole.it_supporter, UserRole.watcher)
 def customer_details():
     email = request.args.get('email')
     customer_no = request.args.get('customer_no')
@@ -147,13 +156,22 @@ def customer_details():
         sib_id=sib_id
     )
 
+    # Calculate differences
+    diffs = agg.find_differences(
+        brevo=result.get('brevo', {}),
+        mdm=result.get('mdm', {}),
+        omneo=result.get('omneo', {}),
+        sfcc=result.get('sfcc', {})
+    )
+
     return render_template(
         'customer_details.html',
         brevo=result.get('brevo', {}),
-        external=result.get('external', {}),
+        mdm=result.get('mdm', {}),
         omneo=result.get('omneo', {}),
         sfcc=result.get('sfcc', {}),
         events=result.get('events', []),
+        diffs=diffs,
         bulk=bulk_flag,
         queries=queries,
         search_type=search_type

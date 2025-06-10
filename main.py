@@ -44,17 +44,9 @@ def main():
 
             # Run backup
             run_backup()
-            
-             
             # Run cleanup
-            try:
-              print("🧹 Kører oprydning af gamle backups...")
-              run_cleanup()
-              print("✅ Cleanup gennemført.")
-            except Exception as e:
-               print(f"❌ FEJL i run_cleanup(): {e}")
-
-            print("🏁 Backup og oprydning afsluttet.")
+            run_cleanup()
+             
 
 
 
